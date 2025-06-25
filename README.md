@@ -1,7 +1,5 @@
-markdown
-CopyEdit
-# EduSync - ทีม power puff girl
 
+# ทีม power puff girl
 ## 👥 Team Members
 - นางสาวจุรีพร ตระกูลดี 66020633  หัวหน้า (ตำแหน่ง: Product Manager)
 - นางสาวณัฐกมล พุทธคุณากร 66020666 สมาชิก (ตำแหน่ง: UX|UI Designer )
