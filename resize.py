@@ -5,13 +5,19 @@ import pillow_heif
 
 pillow_heif.register_heif_opener()  # 🛠 บรรทัดสำคัญ!!
 
-input_folder = '\Dataset\cucumber'
-output_folder = r'C:\Dataset\img resize\cucumber'
-resize_size = (224, 224)  # ขนาดที่ต้องการรีไซส์
+input_folder = r'C:\Dataset\plu_g'
+output_folder = r'C:\Dataset\img_resize\plu-green\512_size'
+resize_size = (512 , 512)  # ขนาดที่ต้องการรีไซส์
 
+print(f"input_folder: {input_folder}")
+print(f"output_folder: {output_folder}")
 os.makedirs(output_folder, exist_ok=True)
 
-file_list = os.listdir(input_folder)
+try:
+    file_list = os.listdir(input_folder)
+except Exception as e:
+    print(f"❌ ไม่สามารถอ่านโฟลเดอร์ input ได้: {e}")
+    file_list = []
 print(f"ไฟล์ทั้งหมดใน {input_folder}: {file_list}")
 found = False
 supported_exts = ('.heic', '.jpg', '.jpeg', '.png')
@@ -24,8 +30,8 @@ for filename in file_list:
         file_path = os.path.join(input_folder, filename)
         try:
             image = Image.open(file_path)
-            image = image.resize(resize_size)
-            new_filename = f"Cucumber_{count:03d}.png" # เปลี่ยนชื่อไฟล์ใหม่เป็นชื่อสมุนไพรนั้นๆ
+            image = image.resize(resize_size, Image.LANCZOS)
+            new_filename = f"plu-green_{count:03d}.png" # เปลี่ยนชื่อไฟล์ใหม่เป็นชื่อสมุนไพรนั้นๆ
             save_path = os.path.join(output_folder, new_filename)
             image.save(save_path, format="PNG")
             print(f"✅ แปลง {filename} เป็น {new_filename} เรียบร้อยแล้ว")
