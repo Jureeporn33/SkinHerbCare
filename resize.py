@@ -4,9 +4,9 @@ import pillow_heif
 
 pillow_heif.register_heif_opener()
 
-input_folder = r'C:\Dataset\พลูคาว\เทรน' #อย่าลืมเปลี่ยนพาร์ท input
-output_folder = r'C:\Dataset\img_resize\พลูคาว\256_size' #อย่าลืมเปลี่ยนพาร์ท output
-resize_size = (256, 256) #เปลี่ยนไซส์รูป
+input_folder = r'C:\Dataset\กระเพรา\เทรน'
+output_folder = r'C:\Dataset\img_resize\กะเพรา'
+resize_size = (640,640)
 
 print(f"input_folder: {input_folder}")
 print(f"output_folder: {output_folder}")
@@ -49,7 +49,7 @@ for filename in file_list:
             enhancer = ImageEnhance.Sharpness(background)
             image = enhancer.enhance(2.0)
 
-            new_filename = f"พลูคาว_{count:03d}.png" #เปลี่ยนชื่อภาพ
+            new_filename = f"กะเพรา_{count:03d}.png"
             save_path = os.path.join(output_folder, new_filename)
             image.save(save_path, format="PNG")
             print(f"✅ แปลง {filename} เป็น {new_filename} เรียบร้อยแล้ว")
