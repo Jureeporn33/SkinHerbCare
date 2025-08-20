@@ -1,0 +1,149 @@
+body {
+    font-family: Arial, sans-serif;
+    background-color: #dff0d8;
+    margin: 0;
+    padding: 0;
+    text-align: center;
+}
+
+h1 {
+    margin: 0;
+    color: #3d2821;
+    font-size: 40px;
+    font-weight: bolder;
+}
+
+h2 {
+    margin: 20px;
+    color: #3d2821;
+    font-size: 30px;
+    font-weight: bolder;
+}
+
+.navbar {
+    display: flex;
+    justify-content: center; /* จัดให้อยู่ตรงกลาง */
+    align-items: center;
+    background-color: #a3d39c;
+    padding: 15px 20px;
+    border-radius: 20px;
+    height: 30px;
+    margin: 0 auto;
+    gap: 60px;
+}
+
+.navbar ul {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: flex;
+    text-align: center;
+    gap: 60px;
+}
+
+.navbar ul li {
+    margin: 0 20px;
+}
+
+.navbar ul li a {
+    text-decoration: none;
+    color: #2e7d32;
+    font-weight: bold;
+    transition: background-color 0.3s, color 0.3s; /* เพิ่ม transition */
+}
+
+.navbar ul li a:hover {
+    background-color: #feffff;
+    color: #2e7d32;
+    border-radius: 20px;
+}
+
+.navbar ul li a.active {
+    background-color: white;
+    padding: 5px 10px;
+    border-radius: 20px;
+    cursor: pointer;
+}
+
+.auth-buttons {
+    display: flex;
+    gap: 10px;
+}
+
+.auth-buttons button {
+    border: 2px solid #2e7d32;
+    background: transparent;
+    padding: 5px 10px;
+    border-radius: 15px;
+    cursor: pointer;
+    transition: background-color 0.3s, color 0.3s; /* เพิ่ม transition */
+}
+
+.auth-buttons button:hover {
+    background-color: #2e7d32;
+    color: white;
+}
+
+.auth-buttons .sign-in {
+    color: #2e7d32;
+}
+
+.auth-buttons .sign-up {
+    background-color: #2e7d32;
+    color: white;
+}
+
+.herb-type-data {
+    display: flex;
+    width: 100%;
+    flex-direction: column;
+    align-items: center;
+    gap: 20px; /* เพิ่มช่องว่างระหว่างกล่อง */
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+    min-height: calc(100vh - 100px); /* ปรับความสูงให้เต็มหน้าจอ */
+}
+
+.garlic-info, .galangal-info, .aloevera-info {
+    border: 2px solid #235b26;
+    border-radius: 10px;
+    padding: 20px;
+    background-color: #cfecd3;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    color: #37231c;
+    width: 80%; /* ปรับความกว้างให้เหมาะสม */
+    max-width: 800px; /* กำหนดความกว้างสูงสุด */
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+    gap: 10px;
+    margin-bottom: 40px; /* เพิ่มช่องว่างระหว่างกล่อง */
+}
+
+.garlic-info img, .galangal-info img, .aloevera-info img {
+    width: 280px;
+    height: 200px;
+    border-radius: 20%;
+}
+
+.garlic-info h3, .galangal-info h3, .aloevera-info h3 {
+    font-size: 20px;
+    font-weight: bolder;
+}
+
+.garlic-info p, .galangal-info p, .aloevera-info p {
+    font-size: 16px;
+    text-align: justify;
+    margin: 1px 0;
+}
+
+footer {
+    background-color: #a3d39c;
+    padding: 15px 0;
+    color: #2e7d32;
+    font-weight: bold;
+    height: 40px;
+}

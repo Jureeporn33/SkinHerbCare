@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>วินิจฉัยโรคผิวหนังด้วยรูปภาพ</title>
+    <link rel="stylesheet" href="image.css">
+</head>
+<body>
+    <h1>SKINHERBCARE</h1><br>
+    <nav class="navbar">
+        <ul>
+            <li><a href="index.html">หน้าแรก</a></li>
+            <li><a href="how-to-use.html">วิธีการใช้งาน</a></li>
+            <li><a href="herb-info.html">ข้อมูลสมุนไพร</a></li>
+            <li><a href="contact.html">ติดต่อเรา</a></li>
+        </ul>
+        <div class="auth-buttons">
+            <button class="sign-in" onclick="location.href='sign-in.html'">เข้าสู่ระบบ</button>
+            <button class="sign-up" onclick="location.href='sign-up.html'">ลงทะเบียน</button>
+        </div>
+    </nav>
+
+    <section class="main-content">
+        <h2>วินิจฉัยโรคผิวหนังด้วยรูปภาพ</h2>
+        <div class="scan-box">
+            <p>เพิ่มรูปภาพเพื่อทำการวิเคราะห์</p><br>
+            <input type="file" id="file" accept="image/*" />
+            <br><button id="scan-button">วิเคราะห์</button>
+            <div id="result" style="margin-top: 20px;"></div>
+        </div>
+    </section>
+
+    <div class="overlay" id="overlay"></div>
+    <div class="popup" id="popup">
+        <p id="disease-name"></p>
+        <p id="accuracy"></p>
+        <p id="herb-name"></p> <!-- เพิ่มองค์ประกอบนี้ -->
+        <button id="view-herb-info">ดูข้อมูลสมุนไพรเพิ่มเติม</button> <!-- เพิ่มปุ่มนี้ -->
+        <button id="close-popup">ปิด</button>
+    </div>
+
+    <footer>
+        <p>&copy; 2025 SKINHERBCARE. All rights reserved.</p>
+    </footer>
+
+    <script>
+        document.getElementById('scan-button').addEventListener('click', function() {
+            const fileInput = document.getElementById('file');
+            const resultDiv = document.getElementById('result');
+            const popup = document.getElementById('popup');
+            const overlay = document.getElementById('overlay');
+            const diseaseNameElement = document.getElementById('disease-name');
+            const accuracyElement = document.getElementById('accuracy');
+            const herbNameElement = document.getElementById('herb-name'); // เพิ่มบรรทัดนี้
+
+            if (!fileInput.files.length) {
+                alert('กรุณาเพิ่มรูปภาพก่อนทำการวิเคราะห์');
+                return;
+            }
+
+            // จำลองการประมวลผลและแสดงผลการวิเคราะห์
+            const diseaseName = 'โรคกลาก';
+            const accuracy = '95%';
+            const herbName = 'กระเทียม ข่า';
+
+            diseaseNameElement.textContent = `ชื่อโรค: ${diseaseName}`;
+            accuracyElement.textContent = `เปอร์เซ็นผลการวิเคราะห์: ${accuracy}`;
+            herbNameElement.textContent = `สมุนไพรที่ใช้รักษา: ${herbName}`;
+
+            popup.style.display = 'block';
+            overlay.style.display = 'block';
+        });
+
+        document.getElementById('close-popup').addEventListener('click', function() {
+            const popup = document.getElementById('popup');
+            const overlay = document.getElementById('overlay');
+
+            popup.style.display = 'none';
+            overlay.style.display = 'none';
+        });
+
+        document.getElementById('view-herb-info').addEventListener('click', function() {
+            window.location.href = 'herb-info.html'; // ลิงก์ไปยังหน้าข้อมูลสมุนไพร
+        });
+    </script>
+</body>
+</html>

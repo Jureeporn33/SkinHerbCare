@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ลงทะเบียน</title>
+    <link rel="stylesheet" href="sign-up.css">
+</head>
+<body>
+    <h1>SKINHERBCARE</h1><br>
+    <nav class="navbar">
+        <ul>
+            <li><a href="index.html">หน้าแรก</a></li>
+            <li><a href="how-to-use.html">วิธีการใช้งาน</a></li>
+            <li><a href="herb-info.html">ข้อมูลสมุนไพร</a></li>
+            <li><a href="contact.html">ติดต่อเรา</a></li>
+            <li><a href="sign-up.html" class="active">ลงทะเบียน</a></li>
+        </ul>
+    </nav>
+
+    <section class="main-content">
+        <h2>ลงทะเบียน</h2>
+        <div class="sign-up-form">
+            <form id="sign-up-form">
+                <label for="username">ชื่อผู้ใช้:</label>
+                <input type="text" id="username" name="username" required>
+                <label for="email">อีเมล:</label>
+                <input type="email" id="email" name="email" required>
+                <label for="password">รหัสผ่าน:</label>
+                <input type="password" id="password" name="password" required>
+                <label for="confirm-password">ยืนยันรหัสผ่าน:</label>
+                <input type="password" id="confirm-password" name="confirm-password" required>
+                <button type="submit">ลงทะเบียน</button>
+            </form>
+            <p>มีบัญชีอยู่แล้ว? <a href="sign-in.html">เข้าสู่ระบบ</a></p>
+        </div>
+    </section>
+
+    <footer>
+        <p>&copy; 2025 SKINHERBCARE. All rights reserved.</p>
+    </footer>
+
+    <script>
+        document.getElementById('sign-up-form').addEventListener('submit', function(event) {
+            event.preventDefault(); // ป้องกันการส่งฟอร์มแบบปกติ
+            // เพิ่มการตรวจสอบรหัสผ่านที่นี่
+            const password = document.getElementById('password').value;
+            const confirmPassword = document.getElementById('confirm-password').value;
+            if (password !== confirmPassword) {
+                alert('รหัสผ่านไม่ตรงกัน');
+                return;
+            }
+            window.location.href = 'dashboard.html'; // นำผู้ใช้ไปยังหน้า dashboard.html
+        });
+    </script>
+</body>
+</html>
