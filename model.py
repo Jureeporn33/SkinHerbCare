@@ -1,0 +1,107 @@
+# --------------------------
+# STEP 1: แบ่ง dataset เป็น train/val/test
+# --------------------------
+import os
+import shutil
+import random
+from pathlib import Path
+
+# path dataset ต้นฉบับ
+input_dir = Path(r"C:\Dataset\img_removeBG\เปลือกมังคุด")   
+output_dir = Path(r"C:\Dataset\label_floder\herb_dataset")  # โฟลเดอร์ผลลัพธ์ train/val/test
+
+# สัดส่วน train/val/test
+train_ratio = 0.7
+val_ratio = 0.2
+test_ratio = 0.1
+
+# สร้างโฟลเดอร์เปล่า train/val/test
+for split in ["train", "val", "test"]:
+    (output_dir / split).mkdir(parents=True, exist_ok=True)
+
+# กำหนด class (กรณีมีหลายคลาสให้เพิ่มชื่อที่นี่)
+classes = ["เปลือกมังคุด"]
+
+for class_name in classes:
+    class_input_dir = input_dir  # สำหรับคลาสเดียวรวมภาพทั้งหมด
+    images = list(class_input_dir.glob("*.png")) + \
+             list(class_input_dir.glob("*.jpg")) + \
+             list(class_input_dir.glob("*.jpeg"))
+    if len(images) == 0:
+        print(f"⚠️ ไม่พบภาพในโฟลเดอร์ {class_input_dir}")
+        continue
+
+    random.shuffle(images)
+    n_total = len(images)
+    n_train = int(n_total * train_ratio)
+    n_val = int(n_total * val_ratio)
+
+    train_files = images[:n_train]
+    val_files = images[n_train:n_train+n_val]
+    test_files = images[n_train+n_val:]
+
+    # ฟังก์ชันคัดลอกไฟล์
+    def move_files(file_list, split):
+        split_dir = output_dir / split / class_name
+        split_dir.mkdir(parents=True, exist_ok=True)
+        for f in file_list:
+            shutil.copy(f, split_dir / f.name)
+
+    move_files(train_files, "train")
+    move_files(val_files, "val")
+    move_files(test_files, "test")
+
+print("✅ Dataset ถูกแบ่งเป็น train/val/test แล้ว")
+
+# --------------------------
+# STEP 2: เทรน YOLOv8 Classification
+# --------------------------
+from ultralytics import YOLO
+
+# โหลดโมเดล pretrained
+model = YOLO("yolov8n-cls.pt")
+
+# เทรน
+model.train(
+    data=str(output_dir),  # path dataset ที่เราสร้าง
+    epochs=50,
+    imgsz=224,
+    batch=16
+)
+
+# --------------------------
+# STEP 3: ประเมินผลบน test set
+# --------------------------
+metrics = model.val(data=str(output_dir / "test"))
+print("📊 Metrics:", metrics)
+
+# --------------------------
+# STEP 4: แสดงกราฟ Loss และ Accuracy
+# --------------------------
+import matplotlib.pyplot as plt
+import pandas as pd
+
+log_path = Path(model.trainer.save_dir) / "results.csv"
+df = pd.read_csv(log_path)
+
+# กราฟ Loss
+plt.figure(figsize=(10,5))
+plt.plot(df["epoch"], df["train/loss"], label="Train Loss")
+plt.plot(df["epoch"], df["val/loss"], label="Val Loss")
+plt.xlabel("Epoch")
+plt.ylabel("Loss")
+plt.title("Training & Validation Loss")
+plt.legend()
+plt.grid(True)
+plt.show()
+
+# กราฟ Accuracy
+plt.figure(figsize=(10,5))
+plt.plot(df["epoch"], df["metrics/accuracy_top1"], label="Top-1 Accuracy")
+plt.plot(df["epoch"], df["metrics/accuracy_top5"], label="Top-5 Accuracy")
+plt.xlabel("Epoch")
+plt.ylabel("Accuracy")
+plt.title("Validation Accuracy")
+plt.legend()
+plt.grid(True)
+plt.show()
