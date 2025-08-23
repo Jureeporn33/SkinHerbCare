@@ -1,19 +1,22 @@
 import os
 
 # โฟลเดอร์ที่เก็บไฟล์
-input_folder = r"D:\dataset\พญายอ\delete bg"
+input_folder = r"D:\herbSkin_Project66\มังคุด"
 
-# คำที่จะเปลี่ยน
-old_text = "พญายอ"
-new_text = "Snake Plant"
+# ชื่อใหม่ที่ต้องการให้เป็นทั้งหมด
+new_text = "Mangosteen Peel"
 
 # ดึงชื่อไฟล์ที่ต้องการแก้
 image_files = [f for f in os.listdir(input_folder) if f.lower().endswith(('.jpg', '.png'))]
 
-for filename in image_files:
-    if old_text in filename:
-        new_name = filename.replace(old_text, new_text)
-        old_path = os.path.join(input_folder, filename)
-        new_path = os.path.join(input_folder, new_name)
-        os.rename(old_path, new_path)
-        print(f"{filename} -> {new_name}")
+# เรียงตามชื่อไฟล์เดิม (เพื่อไม่ให้สลับลำดับ)
+image_files.sort()
+
+# รันเลขลำดับไฟล์ใหม่ทั้งหมด
+for i, filename in enumerate(image_files, start=1):
+    ext = os.path.splitext(filename)[1]  # นามสกุลไฟล์ (.jpg, .png)
+    new_name = f"{new_text}_{i:03d}{ext}"  # เช่น Ivy Gourd_001.jpg
+    old_path = os.path.join(input_folder, filename)
+    new_path = os.path.join(input_folder, new_name)
+    os.rename(old_path, new_path)
+    print(f"{filename} -> {new_name}")
