@@ -12,9 +12,9 @@ import shutil
 import sys
 
 # 🔧 ตั้งค่าโฟลเดอร์ที่นี่
-INPUT_DIR = Path(r"C:\Dataset\img_removeBG\ตำลึง")
-OUTPUT_DIR = Path(r"C:\Dataset\dataset_testtrain_model\ตำลึง")
-NUM_TO_PICK = 50                              # จำนวนรูปที่จะสุ่ม
+INPUT_DIR = Path(r"C:\กระเทียม")
+OUTPUT_DIR = Path(r"D:\herbSkin_Project66\Dataset\images_all")
+NUM_TO_PICK = 1000                              # จำนวนรูปที่จะสุ่ม
 
 # นามสกุลรูปที่รองรับ
 IMAGE_EXTS = {".jpg", ".jpeg", ".png", ".bmp", ".gif", ".webp", ".tif", ".tiff"}
