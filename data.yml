@@ -1,0 +1,18 @@
+names:
+  0: Snake Plant
+  1: Turmeric
+  2: Galanga
+  3: cucumber
+  4: Alovera
+  5: Garlic
+  6: Houttuynia cordata
+  7: pluLeaf
+  8: Ivy Gourd
+  9: Mangosteen Peel
+  10: khaproa
+  11: horapa
+nc: 12
+path: C:\skin_project\herbSkin_Project66\new\dataset
+test: images/test
+train: images/train
+val: images/val
