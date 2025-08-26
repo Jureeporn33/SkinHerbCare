@@ -1,0 +1,527 @@
+import React, { useMemo, useState } from "react";
+import { Camera, Image as ImageIcon, HeartPulse, Brain, Search, Info, AlertTriangle, CheckCircle2, Leaf, Activity, Loader2 } from "lucide-react";
+import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
+import { Badge } from "@/components/ui/badge";
+import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
+import { Progress } from "@/components/ui/progress";
+
+// =============================
+// 🔰 Prototype-only data (mock)
+// =============================
+const HERBS = [
+  {
+    id: "turmeric",
+    nameTH: "ขมิ้นชัน",
+    nameEN: "Turmeric",
+    uses: ["สิวอักเสบ", "ผื่นคัน", "แผลถลอกเล็กน้อย"],
+    cautions: ["อาจระคายเคืองในบางคน ทดลองทาบริเวณเล็กๆ ก่อน", "หลีกเลี่ยงทาบริเวณแผลลึก/ติดเชื้อ"],
+    evidenceNote: "หลักฐานวิจัยบางส่วนสนับสนุนฤทธิ์ต้านอักเสบ แต่ยังต้องการงานวิจัยคุณภาพสูงเพิ่มเติม",
+  },
+  {
+    id: "aloe",
+    nameTH: "ว่านหางจระเข้",
+    nameEN: "Aloe vera",
+    uses: ["ผิวไหม้แดด", "แผลถลอก", "ผิวแห้งลอก"],
+    cautions: ["อาจแพ้ในบางราย", "ใช้เจลที่สะอาดและทดสอบการแพ้"],
+    evidenceNote: "ใช้กันแพร่หลายในการบรรเทาผิวไหม้แดดและเพิ่มความชุ่มชื้น",
+  },
+  {
+    id: "gotukola",
+    nameTH: "ใบบัวบก",
+    nameEN: "Centella asiatica (Gotu kola)",
+    uses: ["ลดรอยแดง", "แผลตื้น"],
+    cautions: ["ระวังปนเปื้อน/สารสกัดที่ไม่ได้มาตรฐาน"],
+    evidenceNote: "มีการใช้เชิงเวชสำอางเพื่อช่วยเรื่องการซ่อมแซมผิว",
+  },
+  {
+    id: "plai",
+    nameTH: "ไพล",
+    nameEN: "Zingiber cassumunar (Plai)",
+    uses: ["ผื่นคัน", "อักเสบเล็กน้อย"],
+    cautions: ["น้ำมันหอมระเหยอาจระคายผิว ควรเจือจาง"],
+    evidenceNote: "มีรายงานฤทธิ์ต้านอักเสบในงานวิจัยบางส่วน",
+  },
+  {
+    id: "teatree",
+    nameTH: "น้ำมันทีทรี",
+    nameEN: "Tea tree oil",
+    uses: ["สิว", "กลิ่นตัว"],
+    cautions: ["ต้องเจือจางก่อนใช้", "อาจระคายผิวได้"],
+    evidenceNote: "มีรายงานฤทธิ์ต้านเชื้อบนผิว แต่ควรใช้ด้วยความระมัดระวัง",
+  },
+];
+
+const CONDITIONS = {
+  acne: {
+    id: "acne",
+    nameTH: "สิว",
+    symptoms: ["ตุ่มหนอง", "อักเสบ", "มัน"],
+    herbs: ["turmeric", "teatree", "gotukola"],
+    care: [
+      "ล้างหน้าอย่างอ่อนโยน",
+      "หลีกเลี่ยงการแกะสิว",
+      "ทดลองทาเฉพาะจุดและทดสอบการแพ้ก่อน",
+    ],
+  },
+  dermatitis: {
+    id: "dermatitis",
+    nameTH: "ผื่นแพ้สัมผัส/อักเสบ",
+    symptoms: ["คัน", "แดง", "แห้งลอก"],
+    herbs: ["aloe", "gotukola", "plai"],
+    care: ["หยุดสัมผัสสิ่งกระตุ้น", "ทดสอบแพ้ก่อนใช้"],
+  },
+  tinea: {
+    id: "tinea",
+    nameTH: "กลาก/เกลื้อน (สงสัย)",
+    symptoms: ["เป็นวง", "คัน", "ขอบชัด"],
+    herbs: ["teatree", "turmeric"],
+    care: ["ควรพบผู้เชี่ยวชาญเพื่อยืนยันก่อน", "รักษาความแห้งของผิว"],
+  },
+  sunburn: {
+    id: "sunburn",
+    nameTH: "ผิวไหม้แดด",
+    symptoms: ["แสบร้อน", "แดง"],
+    herbs: ["aloe", "gotukola"],
+    care: ["ประคบเย็นเบาๆ", "หลีกเลี่ยงแดดซ้ำ"],
+  },
+  minor_wound: {
+    id: "minor_wound",
+    nameTH: "แผลถลอกเล็กน้อย",
+    symptoms: ["ถลอก", "ตื้น"],
+    herbs: ["aloe", "turmeric"],
+    care: ["ล้างแผลให้สะอาด", "พบแพทย์ถ้าแผลลึก/ติดเชื้อ"],
+  },
+};
+
+const KEYWORD_MAP = [
+  { kws: ["สิว", "หัวหนอง", "อุดตัน"], cond: "acne" },
+  { kws: ["คัน", "ผื่น", "แพ้", "ลอก", "แดง"], cond: "dermatitis" },
+  { kws: ["เป็นวง", "เกลื้อน", "กลาก"], cond: "tinea" },
+  { kws: ["ไหม้", "แดด", "แสบร้อน"], cond: "sunburn" },
+  { kws: ["ถลอก", "เป็นแผล", "ขีดข่วน"], cond: "minor_wound" },
+];
+
+function formatConfidence(num) {
+  return (num * 100).toFixed(0) + "%";
+}
+
+function HerbBadge({ id }) {
+  const herb = HERBS.find((h) => h.id === id);
+  if (!herb) return null;
+  return (
+    <Badge className="mr-2 mb-2 flex items-center gap-1"><Leaf size={14} />{herb.nameTH}</Badge>
+  );
+}
+
+function ResultBlock({ title, subtitle, herbs = [], tips = [], confidence = 0.78 }) {
+  return (
+    <Card className="border-2">
+      <CardHeader>
+        <CardTitle className="flex items-center gap-2 text-xl">
+          <CheckCircle2 className="text-green-600" /> {title}
+        </CardTitle>
+        {subtitle && <p className="text-sm text-muted-foreground mt-1">{subtitle}</p>}
+      </CardHeader>
+      <CardContent>
+        {herbs.length > 0 && (
+          <div className="mb-3">
+            <div className="text-sm font-medium mb-2">สมุนไพรที่เกี่ยวข้อง (สาธิต)</div>
+            <div className="flex flex-wrap">{herbs.map((id) => <HerbBadge key={id} id={id} />)}</div>
+          </div>
+        )}
+        {tips.length > 0 && (
+          <ul className="list-disc pl-6 space-y-1 text-sm text-muted-foreground">
+            {tips.map((t, i) => (<li key={i}>{t}</li>))}
+          </ul>
+        )}
+        <div className="mt-4">
+          <div className="text-sm">ระดับความมั่นใจ (จำลอง): {formatConfidence(confidence)}</div>
+          <Progress value={confidence * 100} className="h-2 mt-1" />
+        </div>
+      </CardContent>
+    </Card>
+  );
+}
+
+// =============================
+// Main Prototype Component
+// =============================
+export default function App() {
+  const [tab, setTab] = useState("herb");
+
+  // Herb photo
+  const [herbFile, setHerbFile] = useState(null);
+  const [herbPreview, setHerbPreview] = useState("");
+  const [herbLoading, setHerbLoading] = useState(false);
+  const [herbResult, setHerbResult] = useState(null);
+
+  // Lesion photo
+  const [lesionFile, setLesionFile] = useState(null);
+  const [lesionPreview, setLesionPreview] = useState("");
+  const [lesionLoading, setLesionLoading] = useState(false);
+  const [lesionResult, setLesionResult] = useState(null);
+
+  // Symptom text
+  const [symptomText, setSymptomText] = useState("");
+  const [symptomLoading, setSymptomLoading] = useState(false);
+  const [symptomResult, setSymptomResult] = useState(null);
+
+  const [openHerbDialog, setOpenHerbDialog] = useState(false);
+  const [activeHerb, setActiveHerb] = useState(null);
+
+  const previewURL = (file) => (file ? URL.createObjectURL(file) : "");
+
+  const onUpload = (e, kind) => {
+    const f = e.target.files?.[0];
+    if (!f) return;
+    if (kind === "herb") {
+      setHerbFile(f);
+      setHerbPreview(previewURL(f));
+    } else {
+      setLesionFile(f);
+      setLesionPreview(previewURL(f));
+    }
+  };
+
+  // ===== Simulated AI pipelines =====
+  const simulateDelay = (ms) => new Promise((res) => setTimeout(res, ms));
+
+  const runHerbIdentify = async () => {
+    if (!herbFile) return;
+    setHerbLoading(true);
+    setHerbResult(null);
+    await simulateDelay(1200);
+
+    // Simple mock: map by filename hints or random
+    const pick = ["turmeric", "aloe", "gotukola", "plai"][Math.floor(Math.random() * 4)];
+    const conf = 0.75 + Math.random() * 0.2;
+    const herb = HERBS.find((h) => h.id === pick);
+    setHerbResult({
+      herbId: pick,
+      herbName: herb?.nameTH,
+      suggestedFor: herb?.uses?.slice(0, 2) || [],
+      confidence: conf,
+    });
+    setHerbLoading(false);
+  };
+
+  const runLesionDetect = async () => {
+    if (!lesionFile) return;
+    setLesionLoading(true);
+    setLesionResult(null);
+    await simulateDelay(1400);
+
+    const keys = Object.keys(CONDITIONS);
+    const pickKey = keys[Math.floor(Math.random() * keys.length)];
+    const cond = CONDITIONS[pickKey];
+    const conf = 0.68 + Math.random() * 0.25;
+    setLesionResult({ cond, confidence: conf });
+    setLesionLoading(false);
+  };
+
+  const runSymptomNLP = async () => {
+    if (!symptomText.trim()) return;
+    setSymptomLoading(true);
+    setSymptomResult(null);
+    await simulateDelay(900);
+
+    const text = symptomText.trim();
+    let matched = "dermatitis";
+    for (const rule of KEYWORD_MAP) {
+      if (rule.kws.some((kw) => text.includes(kw))) { matched = rule.cond; break; }
+    }
+    const cond = CONDITIONS[matched];
+    const conf = 0.6 + Math.random() * 0.3;
+    setSymptomResult({ cond, confidence: conf });
+    setSymptomLoading(false);
+  };
+
+  const HerbDialog = () => {
+    const herb = HERBS.find((h) => h.id === activeHerb);
+    if (!herb) return null;
+    return (
+      <Dialog open={openHerbDialog} onOpenChange={setOpenHerbDialog}>
+        <DialogContent className="max-w-lg">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2"><Leaf /> {herb.nameTH} <span className="text-sm text-muted-foreground">({herb.nameEN})</span></DialogTitle>
+          </DialogHeader>
+          <div className="space-y-3">
+            <div>
+              <div className="text-sm font-medium">ประโยชน์ที่พบในตำรา/การใช้ทั่วไป:</div>
+              <ul className="list-disc pl-6 text-sm mt-1">
+                {herb.uses.map((u, i) => <li key={i}>{u}</li>)}
+              </ul>
+            </div>
+            <div>
+              <div className="text-sm font-medium">ข้อควรระวัง:</div>
+              <ul className="list-disc pl-6 text-sm mt-1">
+                {herb.cautions.map((c, i) => <li key={i}>{c}</li>)}
+              </ul>
+            </div>
+            <p className="text-xs text-muted-foreground">บันทึกหลักฐาน: {herb.evidenceNote}</p>
+          </div>
+          <DialogFooter>
+            <Button onClick={() => setOpenHerbDialog(false)}>ปิด</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+    );
+  };
+
+  const SchemaTab = () => {
+    const schema = {
+      Herb: {
+        id: "string",
+        localNames: ["string"],
+        partsUsed: ["ใบ", "เหง้า", "เนื้อเจล"],
+        topicalUses: ["string"],
+        cautions: ["string"],
+        evidence: { level: "A/B/C? (prototype)", notes: "string" },
+      },
+      Condition: {
+        id: "string",
+        nameTH: "string",
+        symptoms: ["string"],
+        herbRefs: ["Herb.id"],
+      },
+      InferenceOutput: {
+        task: "herb-identify | lesion-detect | nlp-symptom",
+        topK: [{ label: "id", score: 0.0 }],
+        suggestedConditions: ["Condition.id"],
+        suggestedHerbs: ["Herb.id"],
+        safetyFlags: ["open_wound", "child", "pregnancy", "allergy"],
+      },
+    };
+
+    return (
+      <Card className="border-2">
+        <CardHeader>
+          <CardTitle>โครงสร้างข้อมูล/สคีมา (ตัวอย่าง)</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <pre className="text-xs bg-muted p-4 rounded overflow-auto">{JSON.stringify(schema, null, 2)}</pre>
+        </CardContent>
+      </Card>
+    );
+  };
+
+  const SafetyNotice = () => (
+    <div className="mt-4 p-4 rounded-2xl border bg-amber-50 text-amber-800 text-sm flex gap-3">
+      <AlertTriangle className="mt-0.5" />
+      <div>
+        <div className="font-semibold">ข้อจำกัด/ความปลอดภัย</div>
+        <ul className="list-disc pl-5 mt-1 space-y-1">
+          <li>ต้นแบบนี้เป็นการสาธิตเท่านั้น <b>ไม่ใช่การวินิจฉัยทางการแพทย์</b> และไม่ควรใช้แทนการพบแพทย์</li>
+          <li>ทดสอบการแพ้ก่อนใช้ทุกครั้ง หยุดใช้ทันทีหากมีอาการผิดปกติ</li>
+          <li>หลีกเลี่ยงใช้กับเด็ก, หญิงตั้งครรภ์/ให้นมบุตร หรือแผลลึก/ติดเชื้อ โดยไม่ปรึกษาผู้เชี่ยวชาญ</li>
+          <li>ระบบยังไม่รองรับภาพบริเวณอวัยวะส่วนสงวน</li>
+        </ul>
+      </div>
+    </div>
+  );
+
+  return (
+    <div className="min-h-screen bg-gradient-to-b from-white to-slate-50">
+      <header className="sticky top-0 z-20 border-b bg-white/80 backdrop-blur">
+        <div className="max-w-6xl mx-auto px-6 py-3 flex items-center justify-between">
+          <div className="flex items-center gap-3">
+            <Leaf />
+            <div>
+              <div className="font-bold text-lg">ThaiHerbSkin.AI</div>
+              <div className="text-xs text-muted-foreground">ต้นแบบระบบแนะนำสมุนไพรไทยสำหรับผิวหนัง</div>
+            </div>
+          </div>
+          <div className="hidden md:flex items-center gap-2 text-xs text-muted-foreground">
+            <Activity size={16} /> Prototype build
+          </div>
+        </div>
+      </header>
+
+      <main className="max-w-6xl mx-auto p-6 space-y-6">
+        <Card className="border-2">
+          <CardContent className="pt-6">
+            <div className="grid md:grid-cols-3 gap-4">
+              <div className="flex items-center gap-3">
+                <div className="p-2 rounded-xl bg-slate-100"><Camera /></div>
+                <div>
+                  <div className="font-semibold">ตรวจสมุนไพรจากภาพ</div>
+                  <div className="text-xs text-muted-foreground">ดูว่าสมุนไพรนั้น <i>อาจ</i>เกี่ยวข้องกับโรคผิวหนังใด</div>
+                </div>
+              </div>
+              <div className="flex items-center gap-3">
+                <div className="p-2 rounded-xl bg-slate-100"><HeartPulse /></div>
+                <div>
+                  <div className="font-semibold">วิเคราะห์รอยโรคจากภาพ</div>
+                  <div className="text-xs text-muted-foreground">ประเมินประเภทอาการ (สาธิต)</div>
+                </div>
+              </div>
+              <div className="flex items-center gap-3">
+                <div className="p-2 rounded-xl bg-slate-100"><Brain /></div>
+                <div>
+                  <div className="font-semibold">พิมพ์อาการให้ AI วิเคราะห์</div>
+                  <div className="text-xs text-muted-foreground">เชื่อมโยงกับสมุนไพรที่เกี่ยวข้อง</div>
+                </div>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+
+        <Tabs value={tab} onValueChange={setTab}>
+          <TabsList className="grid grid-cols-3 w-full md:w-auto">
+            <TabsTrigger value="herb">ถ่ายภาพสมุนไพร</TabsTrigger>
+            <TabsTrigger value="lesion">วิเคราะห์รอยโรค</TabsTrigger>
+            <TabsTrigger value="symptom">พิมพ์อาการ</TabsTrigger>
+          </TabsList>
+
+          {/* ---- Tab: Herb Identify ---- */}
+          <TabsContent value="herb" className="mt-4">
+            <div className="grid md:grid-cols-2 gap-6">
+              <Card className="border-2">
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2"><Camera /> อัปโหลดภาพสมุนไพร</CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  <Input type="file" accept="image/*" onChange={(e) => onUpload(e, "herb")} />
+                  {herbPreview && (
+                    <img src={herbPreview} alt="herb" className="w-full rounded-xl border object-cover max-h-64" />
+                  )}
+                  <Button onClick={runHerbIdentify} disabled={!herbFile || herbLoading}>
+                    {herbLoading ? (<span className="flex items-center gap-2"><Loader2 className="animate-spin" /> กำลังประมวลผล…</span>) : "ประมวลผล (สาธิต)"}
+                  </Button>
+                </CardContent>
+              </Card>
+
+              <div className="space-y-4">
+                {herbResult ? (
+                  <ResultBlock
+                    title={`ผลเบื้องต้น: ${herbResult.herbName || "สมุนไพร"}`}
+                    subtitle="แสดงการเชื่อมโยงกับอาการผิวหนังที่พบบ่อย"
+                    herbs={[herbResult.herbId]}
+                    confidence={herbResult.confidence}
+                    tips={["กดที่ชื่อสมุนไพรเพื่อดูรายละเอียด"]}
+                  />
+                ) : (
+                  <Card className="h-full border-2">
+                    <CardContent className="h-full flex items-center justify-center text-muted-foreground">
+                      <div className="text-sm">ผลลัพธ์จะแสดงที่นี่</div>
+                    </CardContent>
+                  </Card>
+                )}
+                <SafetyNotice />
+              </div>
+            </div>
+          </TabsContent>
+
+          {/* ---- Tab: Lesion Detect ---- */}
+          <TabsContent value="lesion" className="mt-4">
+            <div className="grid md:grid-cols-2 gap-6">
+              <Card className="border-2">
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2"><ImageIcon /> อัปโหลดภาพรอยโรคผิวหนัง</CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  <Input type="file" accept="image/*" onChange={(e) => onUpload(e, "lesion")} />
+                  {lesionPreview && (
+                    <img src={lesionPreview} alt="lesion" className="w-full rounded-xl border object-cover max-h-64" />
+                  )}
+                  <Button onClick={runLesionDetect} disabled={!lesionFile || lesionLoading}>
+                    {lesionLoading ? (<span className="flex items-center gap-2"><Loader2 className="animate-spin" /> กำลังประมวลผล…</span>) : "ประมวลผล (สาธิต)"}
+                  </Button>
+                </CardContent>
+              </Card>
+
+              <div className="space-y-4">
+                {lesionResult ? (
+                  <ResultBlock
+                    title={`สงสัย: ${lesionResult.cond.nameTH}`}
+                    subtitle="ควรยืนยันโดยผู้เชี่ยวชาญก่อนเสมอ"
+                    herbs={lesionResult.cond.herbs}
+                    tips={lesionResult.cond.care}
+                    confidence={lesionResult.confidence}
+                  />
+                ) : (
+                  <Card className="h-full border-2">
+                    <CardContent className="h-full flex items-center justify-center text-muted-foreground">
+                      <div className="text-sm">ผลลัพธ์จะแสดงที่นี่</div>
+                    </CardContent>
+                  </Card>
+                )}
+                <SafetyNotice />
+              </div>
+            </div>
+          </TabsContent>
+
+          {/* ---- Tab: Symptom NLP ---- */}
+          <TabsContent value="symptom" className="mt-4">
+            <div className="grid md:grid-cols-2 gap-6">
+              <Card className="border-2">
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2"><Search /> พิมพ์อาการ</CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  <Textarea rows={6} placeholder="เช่น คัน แดง ลอก เป็นวง ขึ้นผื่นหลังใช้เครื่องสำอาง" value={symptomText} onChange={(e) => setSymptomText(e.target.value)} />
+                  <div className="flex items-center gap-2">
+                    <Button onClick={runSymptomNLP} disabled={symptomLoading || !symptomText.trim()}>
+                      {symptomLoading ? (<span className="flex items-center gap-2"><Loader2 className="animate-spin" /> กำลังประมวลผล…</span>) : "ประมวลผล (สาธิต)"}
+                    </Button>
+                    <Button variant="secondary" onClick={() => setSymptomText("")}>ล้างข้อความ</Button>
+                  </div>
+                </CardContent>
+              </Card>
+
+              <div className="space-y-4">
+                {symptomResult ? (
+                  <ResultBlock
+                    title={`ข้อสันนิษฐานเบื้องต้น: ${symptomResult.cond.nameTH}`}
+                    subtitle="การประเมินจากคีย์เวิร์ด (สาธิต)"
+                    herbs={symptomResult.cond.herbs}
+                    tips={symptomResult.cond.care}
+                    confidence={symptomResult.confidence}
+                  />
+                ) : (
+                  <Card className="h-full border-2">
+                    <CardContent className="h-full flex items-center justify-center text-muted-foreground">
+                      <div className="text-sm">ผลลัพธ์จะแสดงที่นี่</div>
+                    </CardContent>
+                  </Card>
+                )}
+                <SchemaTab />
+                <SafetyNotice />
+              </div>
+            </div>
+          </TabsContent>
+        </Tabs>
+
+        {/* Herb detail popup */}
+        <HerbDialog />
+
+        {/* Quick herb info chips (click to open) */}
+        <div className="pt-2">
+          <div className="text-xs text-muted-foreground mb-2">กดเพื่อดูรายละเอียดสมุนไพร (ต้นแบบ)</div>
+          <div className="flex flex-wrap gap-2">
+            {HERBS.map((h) => (
+              <button
+                key={h.id}
+                onClick={() => { setActiveHerb(h.id); setOpenHerbDialog(true); }}
+                className="text-sm px-3 py-1.5 rounded-full border hover:bg-slate-50"
+              >
+                {h.nameTH}
+              </button>
+            ))}
+          </div>
+        </div>
+      </main>
+
+      <footer className="max-w-6xl mx-auto px-6 py-8 text-xs text-muted-foreground">
+        <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-2">
+          <div>© {new Date().getFullYear()} ThaiHerbSkin.AI — Prototype</div>
+          <div className="flex items-center gap-2"><Info size={14} /> ข้อมูลเพื่อการศึกษาเท่านั้น ไม่ถือเป็นคำแนะนำทางการแพทย์</div>
+        </div>
+      </footer>
+    </div>
+  );
+}
