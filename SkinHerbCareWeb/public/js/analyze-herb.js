@@ -62,6 +62,26 @@ document.addEventListener('DOMContentLoaded', () => {
             console.error('Analysis Error:', error);
             resultsContainer.innerHTML = `<p class="text-red-600">ขออภัย, เกิดข้อผิดพลาด: ${error.message}</p>`;
         }
+//แป๋วเพิ่ม
+        async function predictHerb() {
+            const fileInput = document.getElementById("imageInput");
+            if (!fileInput.files.length) {
+                alert("กรุณาเลือกรูป");
+                return;
+        }
+
+            const formData = new FormData();
+            formData.append("file", fileInput.files[0]);
+            const res = await fetch("/.netlify/functions/predict", {
+                method: "POST",
+                body: formData
+         });
+
+            const data = await res.json();
+            document.getElementById("result").textContent =
+                JSON.stringify(data, null, 2);
+    }
+
     });
 });
 
