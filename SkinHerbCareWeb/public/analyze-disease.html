@@ -443,35 +443,8 @@
     <script src="/js/analyze-skin.js?v=20260208"></script>
     
   <script>
-    function checkLoginStatus() {
-      const token = localStorage.getItem('token') || localStorage.getItem('userToken');
-      const userRaw = localStorage.getItem('user');
-      const userRole = localStorage.getItem('userRole');
-      const guestNav = document.getElementById('guest-nav');
-      const adminNav = document.getElementById('admin-nav');
-      const adminLink = document.querySelector('#admin-nav a[href="/admin-dashboard.html"]');
-
-      const isLoggedIn = Boolean(token && userRaw);
-      if (guestNav) guestNav.style.display = isLoggedIn ? 'none' : 'flex';
-      if (adminNav) adminNav.style.display = isLoggedIn ? 'flex' : 'none';
-      if (adminLink) adminLink.style.display = userRole === 'admin' ? 'inline-flex' : 'none';
-    }
-
-    
-    function logout() {
-      const msg = "\u0E15\u0E49\u0E2D\u0E07\u0E01\u0E32\u0E23\u0E2D\u0E2D\u0E01\u0E08\u0E32\u0E01\u0E23\u0E30\u0E1A\u0E1A\u0E2B\u0E23\u0E37\u0E2D\u0E44\u0E21\u0E48?";
-      if (confirm(msg)) {
-        localStorage.removeItem('token');
-        localStorage.removeItem('userToken');
-        localStorage.removeItem('user');
-        localStorage.removeItem('userRole');
-        location.reload();
-      }
-    }
-
     document.addEventListener('DOMContentLoaded', () => {
       console.log('analyze-disease.html build: 2026-02-10a');
-      checkLoginStatus();
     });
   </script>
 <script>
@@ -545,6 +518,7 @@
     setInterval(renderFallbackHerbs, 700);
   });
 </script>
+<script src="/js/auth.js?v=20260211"></script>
 <script src="/js/profile-drawer.js?v=20260208"></script>
 </body>
 </html>

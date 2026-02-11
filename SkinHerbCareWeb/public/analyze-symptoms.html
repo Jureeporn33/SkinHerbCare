@@ -477,7 +477,7 @@ function renderResults(results, headerMessage) {
         `;
     }).join('');
 
-    const title = headerMessage ? `<div class=\"mb-4 text-center font-medium text-green-800 bg-green-50 py-2 rounded-lg\">${String(headerMessage).includes('ผลการวิเคราะห์') ? 'ผลการวิเคราะห์' : headerMessage}</div>` : '';
+    const title = headerMessage ? `<div class=\"mb-4 text-center font-medium text-green-800 bg-green-50 py-2 rounded-lg\">${String(headerMessage).includes('วิเคราะห์จากฐานข้อมูลภายใน') ? 'ผลการวิเคราะห์' : headerMessage}</div>` : '';
     return `${title}<ul class=\"list-none space-y-4\">${itemsHtml}</ul>`;
 }
 
@@ -542,41 +542,7 @@ function appendMessage(text, sender) {
         }
     </script>
 
-  <script>
-    function checkLoginStatus() {
-      const token = localStorage.getItem('token') || localStorage.getItem('userToken');
-      const userRaw = localStorage.getItem('user');
-      const userRole = localStorage.getItem('userRole');
-      const guestNav = document.getElementById('guest-nav');
-      const adminNav = document.getElementById('admin-nav');
-      const adminLink = document.querySelector('#admin-nav a[href="/admin-dashboard.html"]');
-
-      const isLoggedIn = Boolean(token && userRaw);
-      if (guestNav) guestNav.style.display = isLoggedIn ? 'none' : 'flex';
-      if (adminNav) adminNav.style.display = isLoggedIn ? 'flex' : 'none';
-      if (adminLink) adminLink.style.display = userRole === 'admin' ? 'inline-flex' : 'none';
-    }
-
-    
-    function logout() {
-      const msg = "\u0E15\u0E49\u0E2D\u0E07\u0E01\u0E32\u0E23\u0E2D\u0E2D\u0E01\u0E08\u0E32\u0E01\u0E23\u0E30\u0E1A\u0E1A\u0E2B\u0E23\u0E37\u0E2D\u0E44\u0E21\u0E48?";
-      if (confirm(msg)) {
-        localStorage.removeItem('token');
-        localStorage.removeItem('userToken');
-        localStorage.removeItem('user');
-        localStorage.removeItem('userRole');
-        location.reload();
-      }
-    }
-
-
-
-    document.addEventListener('DOMContentLoaded', () => {
-      checkLoginStatus();
-    });
-  </script>
-
-
+<script src="/js/auth.js?v=20260211"></script>
 <script src="/js/profile-drawer.js"></script>
 </body>
 </html>
