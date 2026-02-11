@@ -416,6 +416,41 @@ function normalizeResults(data) {
     return [];
 }
 
+function renderExpandableText(text, limit = 300) {
+    const fullText = String(text || '-');
+    if (fullText.length <= limit) return fullText;
+
+    const shortText = `${fullText.slice(0, limit).trim()}...`;
+    const key = `readmore-${Math.random().toString(36).slice(2, 9)}`;
+
+    return `
+        <span id="${key}-short">${shortText}</span>
+        <span id="${key}-full" class="hidden">${fullText}</span>
+        <button type="button"
+            class="ml-2 text-green-700 font-semibold hover:underline text-xs md:text-sm"
+            onclick="toggleExpandableText('${key}', this)">
+            อ่านเพิ่มเติม
+        </button>
+    `;
+}
+
+function toggleExpandableText(key, btn) {
+    const shortEl = document.getElementById(`${key}-short`);
+    const fullEl = document.getElementById(`${key}-full`);
+    if (!shortEl || !fullEl) return;
+
+    const isCollapsed = !shortEl.classList.contains('hidden');
+    if (isCollapsed) {
+        shortEl.classList.add('hidden');
+        fullEl.classList.remove('hidden');
+        btn.textContent = 'ย่อเนื้อหา';
+    } else {
+        shortEl.classList.remove('hidden');
+        fullEl.classList.add('hidden');
+        btn.textContent = 'อ่านเพิ่มเติม';
+    }
+}
+
 function renderResults(results, headerMessage) {
     const itemsHtml = results.map((item) => {
         const name = item.disease || item.name || 'Unknown disease';
@@ -469,7 +504,7 @@ function renderResults(results, headerMessage) {
                 
                 <div class=\"mt-3 space-y-2 text-sm text-gray-700\">
                     <p><b>อาการ:</b> ${symptoms}</p>
-                    <p><b>วิธีรักษาเบื้องต้น:</b> ${treatment}</p>
+                    <p><b>วิธีรักษาเบื้องต้น:</b> ${renderExpandableText(treatment, 280)}</p>
                 </div>
 
                 ${herbsHtml}
