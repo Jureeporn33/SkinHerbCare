@@ -1,4 +1,4 @@
-const AUTH_JS_VERSION = '20260211r2';
+const AUTH_JS_VERSION = '20260211r11';
 
 document.addEventListener('DOMContentLoaded', () => {
     document.documentElement.setAttribute('data-auth-js', AUTH_JS_VERSION);
@@ -17,9 +17,11 @@ window.addEventListener('storage', (event) => {
 });
 
 function applyAuthNavState() {
-    const token = localStorage.getItem('token') || localStorage.getItem('userToken');
-    const userRaw = localStorage.getItem('user');
-    const userRole = localStorage.getItem('userRole');
+    const token = localStorage.getItem('token')
+        || localStorage.getItem('userToken')
+        || sessionStorage.getItem('token')
+        || sessionStorage.getItem('userToken');
+    const userRaw = localStorage.getItem('user') || sessionStorage.getItem('user');
     let user = null;
     try {
         user = userRaw ? JSON.parse(userRaw) : null;
@@ -27,12 +29,37 @@ function applyAuthNavState() {
         user = null;
     }
 
-    const guestNav = document.getElementById('guest-nav') || document.getElementById('guest-menu');
-    const adminNav = document.getElementById('admin-nav') || document.getElementById('user-nav') || document.getElementById('user-menu');
+    const guestNav = document.getElementById('guest-nav')
+        || document.getElementById('guest-menu')
+        || document.getElementById('guest-panel');
+    const adminNav = document.getElementById('admin-nav')
+        || document.getElementById('user-nav')
+        || document.getElementById('user-menu')
+        || document.getElementById('user-panel');
     const adminLink = document.querySelector('#admin-nav a[href="/admin-dashboard.html"]');
 
-    // Treat token as source of truth for login state.
-    const isLoggedIn = Boolean(token);
+    const storedRole = String(
+        localStorage.getItem('userRole')
+        || sessionStorage.getItem('userRole')
+        || ''
+    ).toLowerCase();
+    // Prefer role from user payload to avoid stale role cache in localStorage.
+    const normalizedRole = String(
+        user?.role
+        || user?.userRole
+        || storedRole
+        || 'user'
+    ).toLowerCase();
+    const isAdmin = Boolean(token) && normalizedRole === 'admin';
+
+    // Always align role to current user payload to prevent stale admin cache.
+    if (userRaw) {
+        localStorage.setItem('user', userRaw);
+        localStorage.setItem('userRole', normalizedRole);
+    }
+
+    // Treat token/user as login signal to handle inconsistent legacy storage.
+    const isLoggedIn = Boolean(token || userRaw);
 
     // Hide/show login/register links globally (covers pages with imperfect navbar markup)
     const loginLinks = Array.from(document.querySelectorAll('a[href$="/login.html"], a[href="login.html"]'));
@@ -42,18 +69,22 @@ function applyAuthNavState() {
         el.style.setProperty('display', isLoggedIn ? 'none' : '', 'important');
     });
     if (guestNav) {
-        guestNav.style.setProperty('display', isLoggedIn ? 'none' : 'flex', 'important');
-        guestNav.classList.toggle('hidden', isLoggedIn);
+        guestNav.style.setProperty('display', isAdmin ? 'none' : 'flex', 'important');
+        guestNav.classList.toggle('hidden', isAdmin);
     }
     if (adminNav) {
-        adminNav.style.setProperty('display', isLoggedIn ? 'flex' : 'none', 'important');
-        adminNav.classList.toggle('hidden', !isLoggedIn);
+        adminNav.style.setProperty('display', isAdmin ? 'flex' : 'none', 'important');
+        adminNav.classList.toggle('hidden', !isAdmin);
     }
-    if (adminLink) adminLink.style.display = userRole === 'admin' ? 'inline-flex' : 'none';
+    if (adminLink) adminLink.style.display = isAdmin ? 'inline-flex' : 'none';
+    const allAdminLinks = Array.from(document.querySelectorAll('a[href="/admin-dashboard.html"], a[href="admin-dashboard.html"]'));
+    allAdminLinks.forEach((el) => {
+        el.style.setProperty('display', isAdmin ? 'inline-flex' : 'none', 'important');
+    });
 
-    // Fallback for pages that still use old navbar markup without guest-nav/admin-nav.
-    if (!guestNav && !adminNav) {
-        const target = allAuthLinks[0]?.parentElement;
+    // Fallback for pages with legacy navbar (no admin-nav/user-nav).
+    if (!adminNav) {
+        const target = guestNav?.parentElement || allAuthLinks[0]?.parentElement;
         if (!target) return;
 
         let userRow = target.querySelector('[data-auth-user-row="true"]');
@@ -101,6 +132,10 @@ function applyAuthNavState() {
             if (userLabel) userLabel.remove();
             if (userRow) userRow.remove();
         }
+    } else {
+        // Cleanup injected fallback row when a dedicated user/admin nav exists.
+        const fallbackRows = document.querySelectorAll('[data-auth-user-row="true"]');
+        fallbackRows.forEach((row) => row.remove());
     }
 }
 
@@ -123,7 +158,13 @@ function logout() {
     localStorage.removeItem('userToken');
     localStorage.removeItem('user');
     localStorage.removeItem('userRole');
-    window.location.reload();
+    localStorage.removeItem('adminToken');
+    sessionStorage.removeItem('token');
+    sessionStorage.removeItem('userToken');
+    sessionStorage.removeItem('user');
+    sessionStorage.removeItem('userRole');
+    window.location.href = '/index.html';
 }
 
 window.logout = logout;
+window.forceLogout = logout;

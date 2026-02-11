@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="th">
 <head>
 <meta charset="UTF-8">
@@ -30,7 +30,7 @@ body {
   overflow-x: hidden;
 }
 
-/* ðŸŒ¿ Background decoration */
+/* 🌿 Background decoration */
 body::before,
 body::after {
   position: fixed;
@@ -38,21 +38,21 @@ body::after {
   opacity: 0.35;
 }
 body::before {
-  content: "ðŸŒ¿";
+  content: "🌿";
   bottom: -60px;
   left: -60px;
   font-size: 260px;
   transform: rotate(-25deg);
 }
 body::after {
-  content: "ðŸŒ¿";
+  content: "🌿";
   top: -80px;
   right: -80px;
   font-size: 300px;
   transform: rotate(20deg);
 }
 
-/* ðŸ” Navbar */
+/* 🔝 Navbar */
 .top-nav {
   position: sticky;
   top: 0;
@@ -103,11 +103,11 @@ body::after {
   background: rgba(255,255,255,0.6);
 }
 
-/* à¸›à¸¸à¹ˆà¸¡ Admin à¸žà¸´à¹€à¸¨à¸© */
+/* ปุ่ม Admin พิเศษ */
 .admin-btn {
-    background-color: #FFC107 !important; /* à¸ªà¸µà¹€à¸«à¸¥à¸·à¸­à¸‡ */
+    background-color: #FFC107 !important; /* สีเหลือง */
     color: #111C44 !important;
-    display: none; /* à¸‹à¹ˆà¸­à¸™à¹„à¸§à¹‰à¸à¹ˆà¸­à¸™ */
+    display: none; /* ซ่อนไว้ก่อน */
     align-items: center;
     gap: 5px;
     box-shadow: 0 2px 5px rgba(0,0,0,0.1);
@@ -211,7 +211,7 @@ body::after {
   pointer-events: auto;
 }
 
-/* ðŸ“¦ Main layout */
+/* 📦 Main layout */
 .container {
   min-height: calc(100vh - 80px);
   display: flex;
@@ -244,7 +244,7 @@ header p {
   color: #374151;
 }
 
-/* ðŸš€ Feature buttons */
+/* 🚀 Feature buttons */
 .features {
   display: grid;
   grid-template-columns: 1fr;
@@ -298,7 +298,7 @@ header p {
   color: #475569;
 }
 
-/* ðŸŒ¿ Herbal showcase */
+/* 🌿 Herbal showcase */
 .showcase-section {
   padding: 60px 20px 90px;
 }
@@ -418,14 +418,14 @@ header p {
   border: 1px dashed rgba(16, 185, 129, 0.2);
 }
 
-/* ðŸ“± Tablet */
+/* 📱 Tablet */
 @media (max-width: 1024px) {
   .main-card {
     max-width: 90%;
   }
 }
 
-/* ðŸ“± Mobile */
+/* 📱 Mobile */
 @media (max-width: 768px) {
   .main-card {
     padding: 25px 20px;
@@ -469,7 +469,7 @@ header p {
   }
 }
 
-/* ðŸ“± Small Mobile */
+/* 📱 Small Mobile */
 @media (max-width: 480px) {
   header h1 {
     font-size: 1.2rem;
@@ -500,7 +500,7 @@ header p {
 
 <nav class="top-nav">
   <div class="nav-container">
-    <a href="/" class="logo">ðŸŒ¿ SkinHerbCare</a>
+    <a href="/" class="logo">🌿 SkinHerbCare</a>
     
     <!-- Guest Navigation -->
     <div class="auth-links" id="guest-nav">
@@ -509,7 +509,7 @@ header p {
       <a href="/register.html">Sign Up</a>
       <button id="profile-btn-guest" class="profile-icon" aria-label="Profile">
         <img id="profile-img-guest" src="" alt="Profile" style="display:none;">
-        <span id="profile-fallback-guest">ðŸ‘¤</span>
+        <span id="profile-fallback-guest">👤</span>
       </button>
     </div>
 
@@ -517,14 +517,14 @@ header p {
     <div class="auth-links" id="admin-nav" style="display: none;">
       <a href="/">Home</a>
       <a href="/admin-dashboard.html" style="background-color: #FFC107; color: #111C44; border-radius: 8px; padding: 6px 12px; font-weight: 600;">
-        âš™ï¸ à¸ˆà¸±à¸”à¸à¸²à¸£à¸£à¸°à¸šà¸š
+        ⚙️ จัดการระบบ
       </a>
       <button onclick="logout()" style="background: none; border: none; cursor: pointer; text-decoration: none; color: var(--primary-text); font-weight: 600; padding: 6px 12px; border-radius: 8px; font-size: 0.95rem;">
         Log Out
       </button>
       <button id="profile-btn-admin" class="profile-icon" aria-label="Profile">
         <img id="profile-img-admin" src="" alt="Profile" style="display:none;">
-        <span id="profile-fallback-admin">ðŸ‘¤</span>
+        <span id="profile-fallback-admin">👤</span>
       </button>
     </div>
   </div>
@@ -533,51 +533,51 @@ header p {
 <div id="profile-backdrop" class="profile-backdrop"></div>
 <aside id="profile-drawer" class="profile-drawer" aria-hidden="true">
   <div class="profile-drawer-header">
-    <h3 style="font-weight:700;color:#0f3d2e;">à¹‚à¸›à¸£à¹„à¸Ÿà¸¥à¹Œà¸œà¸¹à¹‰à¹ƒà¸Šà¹‰</h3>
-    <button id="profile-close" class="profile-drawer-btn ghost" style="width:auto;padding:6px 10px;">à¸›à¸´à¸”</button>
+    <h3 style="font-weight:700;color:#0f3d2e;">โปรไฟล์ผู้ใช้</h3>
+    <button id="profile-close" class="profile-drawer-btn ghost" style="width:auto;padding:6px 10px;">ปิด</button>
   </div>
   <div style="display:flex;flex-direction:column;align-items:flex-start;gap:6px;">
     <img id="profile-drawer-img" class="profile-drawer-avatar" src="" alt="Profile" style="display:none;">
-    <div id="profile-drawer-fallback" class="profile-drawer-avatar" style="display:flex;align-items:center;justify-content:center;font-size:28px;color:#10b981;">ðŸ‘¤</div>
-    <div class="profile-drawer-name" id="profile-drawer-name">à¸œà¸¹à¹‰à¹ƒà¸Šà¹‰à¸‡à¸²à¸™</div>
+    <div id="profile-drawer-fallback" class="profile-drawer-avatar" style="display:flex;align-items:center;justify-content:center;font-size:28px;color:#10b981;">👤</div>
+    <div class="profile-drawer-name" id="profile-drawer-name">ผู้ใช้งาน</div>
     <div class="profile-drawer-email" id="profile-drawer-email">-</div>
   </div>
   <div class="profile-drawer-actions">
-    <label class="profile-drawer-btn ghost" for="profile-image-input" style="text-align:center;">à¹€à¸›à¸¥à¸µà¹ˆà¸¢à¸™à¸£à¸¹à¸›à¹‚à¸›à¸£à¹„à¸Ÿà¸¥à¹Œ</label>
+    <label class="profile-drawer-btn ghost" for="profile-image-input" style="text-align:center;">เปลี่ยนรูปโปรไฟล์</label>
     <input id="profile-image-input" type="file" accept="image/*" style="display:none;">
-    <button id="profile-logout" class="profile-drawer-btn primary">à¸­à¸­à¸à¸ˆà¸²à¸à¸£à¸°à¸šà¸š</button>
+    <button id="profile-logout" class="profile-drawer-btn primary">ออกจากระบบ</button>
   </div>
 </aside>
 
 <div class="container">
   <div class="main-card">
     <header>
-      <h1>à¸¢à¸´à¸™à¸”à¸µà¸•à¹‰à¸­à¸™à¸£à¸±à¸šà¸ªà¸¹à¹ˆà¹€à¸§à¹‡à¸šà¹„à¸‹à¸•à¹Œà¹à¸™à¸°à¸™à¸³à¸ªà¸¡à¸¸à¸™à¹„à¸žà¸£à¸£à¸±à¸à¸©à¸²à¹‚à¸£à¸„à¸œà¸´à¸§à¸«à¸™à¸±à¸‡</h1>
-      <p>à¹‚à¸›à¸£à¸”à¹€à¸¥à¸·à¸­à¸à¸›à¸£à¸°à¹€à¸ à¸—à¸à¸²à¸£à¹ƒà¸Šà¹‰à¸‡à¸²à¸™</p>
+      <h1>ยินดีต้อนรับสู่เว็บไซต์แนะนำสมุนไพรรักษาโรคผิวหนัง</h1>
+      <p>โปรดเลือกประเภทการใช้งาน</p>
     </header>
 
     <div class="features">
       <a href="/analyze-disease.html" class="feature-button">
-        <div class="feature-icon">ðŸ”</div>
+        <div class="feature-icon">🔍</div>
         <div class="feature-content">
-          <h3>à¸§à¸´à¹€à¸„à¸£à¸²à¸°à¸«à¹Œà¸£à¸¹à¸›à¹‚à¸£à¸„à¸œà¸´à¸§à¸«à¸™à¸±à¸‡</h3>
-          <p>à¸­à¸±à¸›à¹‚à¸«à¸¥à¸”à¸ à¸²à¸žà¸–à¹ˆà¸²à¸¢à¸œà¸´à¸§à¹€à¸žà¸·à¹ˆà¸­à¸£à¸±à¸šà¸à¸²à¸£à¸§à¸´à¹€à¸„à¸£à¸²à¸°à¸«à¹Œà¹€à¸šà¸·à¹‰à¸­à¸‡à¸•à¹‰à¸™</p>
+          <h3>วิเคราะห์รูปโรคผิวหนัง</h3>
+          <p>อัปโหลดภาพถ่ายผิวเพื่อรับการวิเคราะห์เบื้องต้น</p>
         </div>
       </a>
 
       <a href="/analyze-herb.html" class="feature-button">
-        <div class="feature-icon">ðŸŒ±</div>
+        <div class="feature-icon">🌱</div>
         <div class="feature-content">
-          <h3>à¸„à¹‰à¸™à¸«à¸²à¸‚à¹‰à¸­à¸¡à¸¹à¸¥à¸ˆà¸²à¸à¸£à¸¹à¸›à¸ªà¸¡à¸¸à¸™à¹„à¸žà¸£</h3>
-          <p>à¸­à¸±à¸›à¹‚à¸«à¸¥à¸”à¸ à¸²à¸žà¸ªà¸¡à¸¸à¸™à¹„à¸žà¸£à¹€à¸žà¸·à¹ˆà¸­à¸„à¹‰à¸™à¸«à¸²à¸‚à¹‰à¸­à¸¡à¸¹à¸¥à¹à¸¥à¸°à¸ªà¸£à¸£à¸žà¸„à¸¸à¸“</p>
+          <h3>ค้นหาข้อมูลจากรูปสมุนไพร</h3>
+          <p>อัปโหลดภาพสมุนไพรเพื่อค้นหาข้อมูลและสรรพคุณ</p>
         </div>
       </a>
 
       <a href="/analyze-symptoms.html" class="feature-button" onclick="checkLogin(event)">
-        <div class="feature-icon">ðŸ“</div>
+        <div class="feature-icon">📝</div>
         <div class="feature-content">
-          <h3>à¸§à¸´à¹€à¸„à¸£à¸²à¸°à¸«à¹Œà¸ˆà¸²à¸à¸­à¸²à¸à¸²à¸£à¸—à¸µà¹ˆà¸žà¸´à¸¡à¸žà¹Œ</h3>
-          <p>à¸šà¸­à¸à¸­à¸²à¸à¸²à¸£à¸‚à¸­à¸‡à¸„à¸¸à¸“à¹€à¸žà¸·à¹ˆà¸­à¸£à¸±à¸šà¸„à¸³à¹à¸™à¸°à¸™à¸³à¸ªà¸¡à¸¸à¸™à¹„à¸žà¸£</p>
+          <h3>วิเคราะห์จากอาการที่พิมพ์</h3>
+          <p>บอกอาการของคุณเพื่อรับคำแนะนำสมุนไพร</p>
         </div>
       </a>
     </div>
@@ -588,22 +588,77 @@ header p {
   <div class="showcase-inner">
     <div class="showcase-header">
       <div>
-        <h2>à¸„à¸¥à¸±à¸‡à¸ªà¸¡à¸¸à¸™à¹„à¸žà¸£à¹à¸™à¸°à¸™à¸³</h2>
-        <p>à¸­à¸±à¸›à¹€à¸”à¸•à¸ˆà¸²à¸à¸à¸²à¸™à¸‚à¹‰à¸­à¸¡à¸¹à¸¥à¸¥à¹ˆà¸²à¸ªà¸¸à¸”</p>
+        <h2>คลังสมุนไพรแนะนำ</h2>
+        <p>อัปเดตจากฐานข้อมูลล่าสุด</p>
       </div>
-      <a class="showcase-link" href="/herb_library.html">à¸”à¸¹à¸—à¸±à¹‰à¸‡à¸«à¸¡à¸”</a>
+      <a class="showcase-link" href="/herb_library.html">ดูทั้งหมด</a>
     </div>
     <div class="showcase-grid" id="herb-showcase-container">
-      <div class="showcase-loading">à¸à¸³à¸¥à¸±à¸‡à¹‚à¸«à¸¥à¸”à¸‚à¹‰à¸­à¸¡à¸¹à¸¥à¸ªà¸¡à¸¸à¸™à¹„à¸žà¸£...</div>
+      <div class="showcase-loading">กำลังโหลดข้อมูลสมุนไพร...</div>
+    </div>
+  </div>
+</section>
+
+<section class="showcase-section" style="padding-top: 0;">
+  <div class="showcase-inner">
+    <div class="showcase-header">
+      <div>
+        <h2>โรครอบตัว</h2>
+        <p>แสดงเฉพาะโรคที่เผยแพร่แล้วจากระบบ</p>
+      </div>
+      <a class="showcase-link" href="/analyze-symptoms.html">ไปหน้าวิเคราะห์อาการ</a>
+    </div>
+    <div class="showcase-grid" id="disease-showcase-container">
+      <div class="showcase-loading">กำลังโหลดข้อมูลโรค...</div>
     </div>
   </div>
 </section>
 
 <script>
+    function checkLoginStatus() {
+        const token = localStorage.getItem('token') || localStorage.getItem('userToken');
+        const userRaw = localStorage.getItem('user');
+        let user = null;
+        try { user = userRaw ? JSON.parse(userRaw) : null; } catch (_) { user = null; }
+        const userRole = String(user?.role || user?.userRole || localStorage.getItem('userRole') || 'user').toLowerCase();
+        const guestNav = document.getElementById('guest-nav');
+        const adminNav = document.getElementById('admin-nav');
+        const adminLink = document.querySelector('#admin-nav a[href="/admin-dashboard.html"]');
+
+        if (token && userRole === 'admin') {
+            if (guestNav) guestNav.style.display = 'none';
+            if (adminNav) adminNav.style.display = 'flex';
+            if (adminLink) adminLink.style.display = 'inline-flex';
+        } else if (token) {
+            if (guestNav) guestNav.style.display = 'flex';
+            if (adminNav) adminNav.style.display = 'none';
+            if (adminLink) adminLink.style.display = 'none';
+            const loginBtn = document.querySelector('a[href="/login.html"], a[href="/login"]');
+            const signupBtn = document.querySelector('a[href="/register.html"], a[href="/register"]');
+            if (loginBtn) loginBtn.style.display = 'none';
+            if (signupBtn) signupBtn.style.display = 'none';
+        } else {
+            if (guestNav) guestNav.style.display = 'flex';
+            if (adminNav) adminNav.style.display = 'none';
+            if (adminLink) adminLink.style.display = 'none';
+        }
+    }
+
+    function logout() {
+        if (confirm('❓ ต้องการออกจากระบบหรือไม่?')) {
+            localStorage.removeItem('token');
+            localStorage.removeItem('userToken');
+            localStorage.removeItem('user');
+            localStorage.removeItem('userRole');
+            location.reload();
+        }
+    }
+
     function setupProfilePanel() {
         const token = localStorage.getItem('token') || localStorage.getItem('userToken');
         const userRaw = localStorage.getItem('user');
-        const user = userRaw ? JSON.parse(userRaw) : null;
+        let user = null;
+        try { user = userRaw ? JSON.parse(userRaw) : null; } catch (_) { user = null; }
 
         const btnGuest = document.getElementById('profile-btn-guest');
         const btnAdmin = document.getElementById('profile-btn-admin');
@@ -637,8 +692,8 @@ header p {
         };
 
         const fullName = user
-            ? [user.firstName, user.lastName].filter(Boolean).join(' ') || user.name || user.username || 'à¸œà¸¹à¹‰à¹ƒà¸Šà¹‰à¸‡à¸²à¸™'
-            : 'à¸œà¸¹à¹‰à¹ƒà¸Šà¹‰à¸‡à¸²à¸™';
+            ? [user.firstName, user.lastName].filter(Boolean).join(' ') || user.name || user.username || 'ผู้ใช้งาน'
+            : 'ผู้ใช้งาน';
         const email = user && user.email ? user.email : '-';
 
         nameEl.textContent = fullName;
@@ -680,7 +735,7 @@ header p {
         if (btnAdmin) btnAdmin.addEventListener('click', openDrawer);
         if (closeBtn) closeBtn.addEventListener('click', closeDrawer);
         if (backdrop) backdrop.addEventListener('click', closeDrawer);
-        if (logoutBtn) logoutBtn.addEventListener('click', () => window.logout && window.logout());
+        if (logoutBtn) logoutBtn.addEventListener('click', logout);
         if (imageInput) {
             imageInput.addEventListener('change', () => {
                 const file = imageInput.files && imageInput.files[0];
@@ -704,9 +759,14 @@ header p {
         }
     }
 
-    const API_BASE_URL = window.location.hostname.includes('netlify.app')
-        ? 'https://skinherbcareweb1.onrender.com'
-        : window.location.origin;
+    const RENDER_BASE_URL = 'https://skinherbcareweb1.onrender.com';
+    const isLocalHost = /^(localhost|127\.0\.0\.1)$/i.test(window.location.hostname);
+    const isRenderHost = window.location.hostname.includes('onrender.com');
+    const API_BASE_URL = (isLocalHost || isRenderHost) ? window.location.origin : RENDER_BASE_URL;
+    const FETCH_TIMEOUT_MS = 12000;
+    const RETRY_PER_URL = 2;
+
+    const delay = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
 
     function resolveImageSrc(raw) {
         if (!raw) return '';
@@ -723,20 +783,46 @@ header p {
         return `${API_BASE_URL}/${normalized.replace(/^\/+/, '')}`;
     }
 
+    async function fetchJsonWithFallback(path) {
+        const urls = [`${API_BASE_URL}${path}`];
+        if (API_BASE_URL !== RENDER_BASE_URL) urls.push(`${RENDER_BASE_URL}${path}`);
+
+        let lastError = null;
+        for (const url of urls) {
+            for (let attempt = 1; attempt <= RETRY_PER_URL; attempt++) {
+                const controller = new AbortController();
+                const timeoutId = setTimeout(() => controller.abort(), FETCH_TIMEOUT_MS);
+                try {
+                    const response = await fetch(url, { signal: controller.signal });
+                    if (!response.ok) throw new Error(`HTTP ${response.status}`);
+                    const contentType = response.headers.get('content-type') || '';
+                    if (!contentType.includes('application/json')) throw new Error('Unexpected non-JSON response');
+                    clearTimeout(timeoutId);
+                    return await response.json();
+                } catch (error) {
+                    clearTimeout(timeoutId);
+                    lastError = error;
+                    if (attempt < RETRY_PER_URL) {
+                        await delay(1000 * attempt);
+                    }
+                }
+            }
+        }
+        throw lastError || new Error('Request failed');
+    }
+
     async function loadShowcaseHerbs() {
         const container = document.getElementById('herb-showcase-container');
         if (!container) return;
 
         try {
-            const response = await fetch(`${API_BASE_URL}/api/herbs`);
-            if (!response.ok) throw new Error('à¹‚à¸«à¸¥à¸”à¸‚à¹‰à¸­à¸¡à¸¹à¸¥à¹„à¸¡à¹ˆà¸ªà¸³à¹€à¸£à¹‡à¸ˆ');
-            const json = await response.json();
+            const json = await fetchJsonWithFallback('/api/herbs');
             const herbs = Array.isArray(json)
                 ? json
                 : (json.herbs || json.data || []);
 
             if (!Array.isArray(herbs) || herbs.length === 0) {
-                container.innerHTML = '<div class="showcase-loading">à¸¢à¸±à¸‡à¹„à¸¡à¹ˆà¸¡à¸µà¸‚à¹‰à¸­à¸¡à¸¹à¸¥à¸ªà¸¡à¸¸à¸™à¹„à¸žà¸£</div>';
+                container.innerHTML = '<div class="showcase-loading">ยังไม่มีข้อมูลสมุนไพร</div>';
                 return;
             }
 
@@ -747,7 +833,7 @@ header p {
                     : (herb.properties || '');
                 const shortDesc = propertiesText.length > 90
                     ? `${propertiesText.substring(0, 90)}...`
-                    : (propertiesText || 'à¹„à¸¡à¹ˆà¸¡à¸µà¸‚à¹‰à¸­à¸¡à¸¹à¸¥à¸ªà¸£à¸£à¸žà¸„à¸¸à¸“');
+                    : (propertiesText || 'ไม่มีข้อมูลสรรพคุณ');
                 const imageSrc = resolveImageSrc(herb.image || '');
                 const herbId = herb._id || herb.id || '';
 
@@ -760,10 +846,10 @@ header p {
                             }
                         </div>
                         <div class="showcase-body">
-                            <h3 class="showcase-title">${herb.name || 'à¹„à¸¡à¹ˆà¸£à¸°à¸šà¸¸à¸Šà¸·à¹ˆà¸­'}</h3>
+                            <h3 class="showcase-title">${herb.name || 'ไม่ระบุชื่อ'}</h3>
                             <p class="showcase-desc">${shortDesc}</p>
                             <a class="showcase-btn" href="/herb_detail_public.html?id=${herbId}">
-                                à¸­à¹ˆà¸²à¸™à¹€à¸žà¸´à¹ˆà¸¡à¹€à¸•à¸´à¸¡
+                                อ่านเพิ่มเติม
                             </a>
                         </div>
                     </div>
@@ -773,18 +859,80 @@ header p {
             container.innerHTML = herbsHtml;
         } catch (error) {
             console.error('Error:', error);
-            container.innerHTML = '<div class="showcase-loading">à¹€à¸à¸´à¸”à¸‚à¹‰à¸­à¸œà¸´à¸”à¸žà¸¥à¸²à¸”à¹ƒà¸™à¸à¸²à¸£à¹‚à¸«à¸¥à¸”à¸‚à¹‰à¸­à¸¡à¸¹à¸¥</div>';
+            container.innerHTML = '<div class="showcase-loading">เกิดข้อผิดพลาดในการโหลดข้อมูล</div>';
+        }
+    }
+
+    async function loadShowcaseDiseases() {
+        const container = document.getElementById('disease-showcase-container');
+        if (!container) return;
+
+        try {
+            const json = await fetchJsonWithFallback('/api/diseases');
+            const diseases = Array.isArray(json)
+                ? json
+                : (json.diseases || json.data || []);
+
+            if (!Array.isArray(diseases) || diseases.length === 0) {
+                container.innerHTML = '<div class="showcase-loading">ยังไม่มีข้อมูลโรคที่เผยแพร่</div>';
+                return;
+            }
+
+            const showcaseDiseases = diseases.slice(0, 4);
+            const diseasesHtml = showcaseDiseases.map((disease) => {
+                const imageSrc = resolveImageSrc(disease.image || '');
+                const symptomsText = Array.isArray(disease.symptoms)
+                    ? disease.symptoms.join(', ')
+                    : (disease.symptoms || '');
+                const shortSymptoms = symptomsText.length > 90
+                    ? `${symptomsText.substring(0, 90)}...`
+                    : (symptomsText || 'ไม่มีข้อมูลอาการ');
+                const medicines = Array.isArray(disease.medicines) ? disease.medicines.slice(0, 3) : [];
+                const usageText = (disease.usage || disease.description || '').trim();
+                const shortUsage = usageText.length > 90
+                    ? `${usageText.substring(0, 90)}...`
+                    : (usageText || 'ไม่มีข้อมูลคำแนะนำ');
+
+                return `
+                    <div class="showcase-card">
+                        <div class="showcase-image">
+                            ${imageSrc
+                                ? `<img src="${imageSrc}" alt="${disease.name || 'Disease'}">`
+                                : `<div class="showcase-image-placeholder">No Image</div>`
+                            }
+                        </div>
+                        <div class="showcase-body">
+                            <h3 class="showcase-title">${disease.name || 'ไม่ระบุชื่อโรค'}</h3>
+                            <p class="showcase-desc"><strong>อาการ:</strong> ${shortSymptoms}</p>
+                            <p class="showcase-desc"><strong>คำแนะนำ:</strong> ${shortUsage}</p>
+                            <div class="showcase-desc">
+                                <strong>สมุนไพร:</strong>
+                                ${medicines.length
+                                    ? medicines.map((m) => `<span style="display:inline-block;margin:4px 4px 0 0;padding:2px 8px;border-radius:999px;background:#e8fff5;color:#0f766e;font-size:12px;">${m}</span>`).join('')
+                                    : '<span>ไม่มีข้อมูล</span>'
+                                }
+                            </div>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+
+            container.innerHTML = diseasesHtml;
+        } catch (error) {
+            console.error('Error:', error);
+            container.innerHTML = '<div class="showcase-loading">เกิดข้อผิดพลาดในการโหลดข้อมูลโรค</div>';
         }
     }
 
     document.addEventListener("DOMContentLoaded", () => {
+        checkLoginStatus();
         setupProfilePanel();
         loadShowcaseHerbs();
+        loadShowcaseDiseases();
     });
 </script>
-<script src="/js/auth.js?v=20260211r2r2"></script>
+<script src="/js/auth.js?v=20260211r10"></script>
+<script src="/js/profile-drawer.js?v=20260208"></script>
 
 </body>
 </html>
-
-

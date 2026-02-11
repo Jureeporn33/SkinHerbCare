@@ -5,7 +5,12 @@ document.addEventListener('DOMContentLoaded', () => {
     }
     const token = localStorage.getItem('token') || localStorage.getItem('userToken');
     const userRaw = localStorage.getItem('user');
-    const user = userRaw ? JSON.parse(userRaw) : null;
+    let user = null;
+    try {
+        user = userRaw ? JSON.parse(userRaw) : null;
+    } catch (_) {
+        user = null;
+    }
     const ASSET_BASE_URL = window.location.hostname.includes('netlify.app')
         ? 'https://skinherbcareweb1.onrender.com'
         : window.location.origin;
@@ -180,6 +185,7 @@ document.addEventListener('DOMContentLoaded', () => {
     sidebarNames.forEach((el) => { el.textContent = fullName; });
 
     const sidebarImgs = Array.from(document.querySelectorAll('.admin-sidebar-img'));
+    const sidebarFallback = document.getElementById('profile-sidebar-fallback');
 
     const profileIconEls = Array.from(document.querySelectorAll('.profile-icon'));
     const ensureProfileIcon = (el) => {
@@ -257,7 +263,9 @@ document.addEventListener('DOMContentLoaded', () => {
             });
             sidebarImgs.forEach((img) => {
                 img.src = normalized;
+                img.style.display = 'block';
             });
+            if (sidebarFallback) sidebarFallback.style.display = 'none';
         } else {
             imgDrawer.style.display = 'none';
             fallbackDrawer.style.display = 'flex';
@@ -274,7 +282,9 @@ document.addEventListener('DOMContentLoaded', () => {
             });
             sidebarImgs.forEach((img) => {
                 img.src = '';
+                img.style.display = 'none';
             });
+            if (sidebarFallback) sidebarFallback.style.display = 'flex';
         }
     };
     const legacyImage = localStorage.getItem('profileImage');
@@ -367,6 +377,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const adminClose = document.getElementById('profile-close');
         const adminBtn = document.getElementById('profile-btn-admin');
         const adminInput = document.getElementById('profile-image-input');
+        const adminLogout = document.getElementById('profile-logout');
 
         const openAdminDrawer = () => {
             if (!token) {
@@ -411,6 +422,21 @@ document.addEventListener('DOMContentLoaded', () => {
                     applyImage(src);
                 };
                 reader.readAsDataURL(file);
+            });
+        }
+
+        if (adminLogout) {
+            adminLogout.addEventListener('click', () => {
+                localStorage.removeItem('token');
+                localStorage.removeItem('userToken');
+                localStorage.removeItem('user');
+                localStorage.removeItem('userRole');
+                localStorage.removeItem('adminToken');
+                sessionStorage.removeItem('token');
+                sessionStorage.removeItem('userToken');
+                sessionStorage.removeItem('user');
+                sessionStorage.removeItem('userRole');
+                window.location.href = '/login.html';
             });
         }
     }

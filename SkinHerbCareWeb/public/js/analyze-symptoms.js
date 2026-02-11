@@ -1,4 +1,6 @@
+const ANALYZE_SYMPTOMS_JS_VERSION = '20260211r2';
 document.addEventListener('DOMContentLoaded', async () => {
+    console.log('[analyze-symptoms.js] loaded', ANALYZE_SYMPTOMS_JS_VERSION);
     const API_BASE_URL = window.location.hostname.includes('netlify.app')
         ? 'https://skinherbcareweb1.onrender.com'
         : window.location.origin;
@@ -14,11 +16,19 @@ document.addEventListener('DOMContentLoaded', async () => {
     }
 
     try {
-        const res = await fetch(`${API_BASE_URL}/api/auth/profile`, {
-            headers: {
-                'Authorization': `Bearer ${token}`
-            }
-        });
+        const authController = new AbortController();
+        const authTimeoutId = setTimeout(() => authController.abort(), 12000);
+        let res;
+        try {
+            res = await fetch(`${API_BASE_URL}/api/auth/profile`, {
+                headers: {
+                    'Authorization': `Bearer ${token}`
+                },
+                signal: authController.signal
+            });
+        } finally {
+            clearTimeout(authTimeoutId);
+        }
         if (!res.ok) {
             localStorage.removeItem('token');
             localStorage.removeItem('userToken');
@@ -35,6 +45,58 @@ document.addEventListener('DOMContentLoaded', async () => {
     const analyzeBtn = document.getElementById('analyze-symptom-btn');
     const resultsContainer = document.getElementById('results-container');
     const textInput = document.getElementById('symptom-input');
+    let readMoreCounter = 0;
+
+    const escapeHtml = (value) => String(value || '')
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#39;');
+
+    const renderReadMoreBlock = (label, rawText) => {
+        const text = String(rawText || '').trim();
+        if (!text) return '';
+
+        const safeText = escapeHtml(text);
+        if (safeText.length <= 180) {
+            return `<p><strong>${label}:</strong> ${safeText}</p>`;
+        }
+
+        const id = `rm-${Date.now()}-${readMoreCounter++}`;
+        return `
+            <div class="mt-1">
+                <strong>${label}:</strong>
+                <span data-rm-short="${id}" style="display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;vertical-align:top;">${safeText}</span>
+                <span data-rm-full="${id}" style="display:none;vertical-align:top;">${safeText}</span>
+                <button type="button" data-rm-toggle="${id}" class="ml-2 text-green-700 font-semibold text-sm hover:underline">อ่านเพิ่มเติม</button>
+            </div>
+        `;
+    };
+
+    if (resultsContainer && !resultsContainer.dataset.readMoreBound) {
+        resultsContainer.addEventListener('click', (event) => {
+            const toggle = event.target.closest('[data-rm-toggle]');
+            if (!toggle) return;
+
+            const id = toggle.getAttribute('data-rm-toggle');
+            const shortEl = resultsContainer.querySelector(`[data-rm-short="${id}"]`);
+            const fullEl = resultsContainer.querySelector(`[data-rm-full="${id}"]`);
+            if (!shortEl || !fullEl) return;
+
+            const isExpanded = fullEl.style.display !== 'none';
+            if (isExpanded) {
+                shortEl.style.display = '-webkit-box';
+                fullEl.style.display = 'none';
+                toggle.textContent = 'อ่านเพิ่มเติม';
+            } else {
+                shortEl.style.display = 'none';
+                fullEl.style.display = 'inline';
+                toggle.textContent = 'ย่อเนื้อหา';
+            }
+        });
+        resultsContainer.dataset.readMoreBound = 'true';
+    }
 
     analyzeBtn.addEventListener('click', async () => {
         const symptoms = textInput.value.trim();
@@ -124,7 +186,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                     <div class="mb-4 p-4 border rounded-lg bg-green-50">
                         <p><strong>โรคที่คาดว่าเป็น:</strong> ${disease}</p>
                         <p><strong>ความมั่นใจ:</strong> ${confidencePct}%</p>
-                        ${advice ? `<p><strong>คำแนะนำ:</strong> ${advice}</p>` : ''}
+                        ${renderReadMoreBlock('คำแนะนำ', advice)}
                     </div>
 
                     <h5 class="text-lg font-bold mb-2 text-green-700">🌿 สมุนไพรที่แนะนำ</h5>
@@ -135,7 +197,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                         htmlContent += `
                             <div class="mb-2 p-3 border border-green-100 rounded bg-white">
                                 • <strong>${herb.name}</strong>
-                                ${herb.usage ? `<div class="text-sm text-gray-600 mt-1"><strong>วิธีใช้:</strong> ${herb.usage}</div>` : ''}
+                                ${herb.usage ? `<div class="text-sm text-gray-600 mt-1">${renderReadMoreBlock('วิธีใช้', herb.usage)}</div>` : ''}
                             </div>
                         `;
                     });

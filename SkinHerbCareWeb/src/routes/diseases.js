@@ -14,7 +14,17 @@ router.get('/', async (req, res) => {
     let diseases;
     if (q) {
       const regex = new RegExp(q.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), 'i');
-      diseases = await Disease.find({ published: true, name: regex });
+      diseases = await Disease.find({
+        published: true,
+        $or: [
+          { name: regex },
+          { engName: regex },
+          { description: regex },
+          { symptoms: regex },
+          { medicines: regex },
+          { usage: regex }
+        ]
+      });
     } else {
       diseases = await Disease.find({ published: true });
     }
@@ -31,7 +41,16 @@ router.get('/admin', protect, admin, async (req, res) => {
     let diseases;
     if (q) {
       const regex = new RegExp(q.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), 'i');
-      diseases = await Disease.find({ name: regex });
+      diseases = await Disease.find({
+        $or: [
+          { name: regex },
+          { engName: regex },
+          { description: regex },
+          { symptoms: regex },
+          { medicines: regex },
+          { usage: regex }
+        ]
+      });
     } else {
       diseases = await Disease.find();
     }

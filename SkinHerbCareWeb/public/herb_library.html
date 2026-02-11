@@ -1,15 +1,108 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="th">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>à¸„à¸¥à¸±à¸‡à¸ªà¸¡à¸¸à¸™à¹„à¸žà¸£à¸—à¸±à¹‰à¸‡à¸«à¸¡à¸” - SkinHerbCare</title>
+  <title>คลังสมุนไพรทั้งหมด - SkinHerbCare</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@400;500;600;700&display=swap" rel="stylesheet">
   <style>
+    :root {
+      --bg-gradient-start: #e0f2f1;
+      --bg-gradient-end: #dcfce7;
+      --border-color: rgba(255, 255, 255, 0.25);
+      --primary-text: #064e3b;
+    }
     body {
+      margin: 0;
       font-family: "Sarabun", sans-serif;
-      background: linear-gradient(160deg, #e0f2f1 0%, #dcfce7 100%);
+      background: linear-gradient(160deg, var(--bg-gradient-start), var(--bg-gradient-end));
+      color: var(--primary-text);
+      overflow-x: hidden;
+    }
+    body::before,
+    body::after {
+      position: fixed;
+      z-index: -1;
+      opacity: 0.35;
+    }
+    body::before {
+      content: "🌿";
+      bottom: -60px;
+      left: -60px;
+      font-size: 260px;
+      transform: rotate(-25deg);
+    }
+    body::after {
+      content: "🌿";
+      top: -80px;
+      right: -80px;
+      font-size: 300px;
+      transform: rotate(20deg);
+    }
+    .top-nav {
+      position: sticky;
+      top: 0;
+      width: 100%;
+      padding: 12px 20px;
+      backdrop-filter: blur(10px);
+      background: rgba(255,255,255,0.35);
+      border-bottom: 1px solid var(--border-color);
+      z-index: 100;
+    }
+    .nav-container {
+      max-width: 1200px;
+      margin: auto;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 15px;
+      flex-wrap: wrap;
+    }
+    .logo {
+      font-size: 1.4rem;
+      font-weight: 700;
+      text-decoration: none;
+      color: var(--primary-text);
+      white-space: nowrap;
+    }
+    .auth-links {
+      display: flex;
+      gap: 8px;
+      align-items: center;
+      flex-wrap: wrap;
+      justify-content: flex-end;
+    }
+    .auth-links a {
+      text-decoration: none;
+      padding: 6px 12px;
+      border-radius: 8px;
+      font-weight: 600;
+      color: var(--primary-text);
+      font-size: 0.95rem;
+    }
+    .auth-links a:hover {
+      background: rgba(255,255,255,0.6);
+    }
+    .profile-icon {
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      background: rgba(255,255,255,0.6);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      overflow: hidden;
+      padding: 0;
+    }
+    .profile-icon img {
+      width: 100%;
+      height: 100%;
+      border-radius: 50%;
+      object-fit: cover;
+      object-position: center;
+      display: block;
     }
     .card-glass {
       background: rgba(255, 255, 255, 0.85);
@@ -17,16 +110,61 @@
       border: 1px solid rgba(255, 255, 255, 0.6);
       box-shadow: 0 18px 40px rgba(16, 185, 129, 0.12);
     }
+    @media (max-width: 640px) {
+      .top-nav {
+        padding: 10px 12px;
+      }
+      .logo {
+        font-size: 1.1rem;
+      }
+      .auth-links {
+        justify-content: center;
+        width: 100%;
+        gap: 6px;
+      }
+      .auth-links a {
+        padding: 5px 10px;
+        font-size: 0.85rem;
+      }
+      .profile-icon {
+        width: 32px;
+        height: 32px;
+      }
+      body::before,
+      body::after {
+        font-size: 160px;
+        opacity: 0.25;
+      }
+    }
   </style>
 </head>
 <body class="text-gray-800">
-  <nav class="sticky top-0 z-20 bg-white/40 backdrop-blur-md border-b border-white/50">
-    <div class="max-w-6xl mx-auto px-4 py-3 flex items-center justify-between gap-4">
-      <a href="/index.html" class="text-lg font-bold text-green-900">ðŸŒ¿ SkinHerbCare</a>
-      <div class="flex items-center gap-2 text-sm">
-        <a href="/index.html" class="px-3 py-1 rounded-lg hover:bg-white/70">Home</a>
-        <a href="/login.html" class="px-3 py-1 rounded-lg hover:bg-white/70">Log In</a>
-        <a href="/register.html" class="px-3 py-1 rounded-lg hover:bg-white/70">Sign Up</a>
+  <nav class="top-nav">
+    <div class="nav-container">
+      <a href="/" class="logo">🌿 SkinHerbCare</a>
+
+      <div class="auth-links" id="guest-nav">
+        <a href="/">Home</a>
+        <a href="/login.html">Log In</a>
+        <a href="/register.html">Sign Up</a>
+        <button id="profile-btn-guest" class="profile-icon" aria-label="Profile">
+          <img id="profile-img-guest" src="" alt="Profile" style="display:none;">
+          <span id="profile-fallback-guest">👤</span>
+        </button>
+      </div>
+
+      <div class="auth-links" id="admin-nav" style="display: none;">
+        <a href="/">Home</a>
+        <a href="/admin-dashboard.html" style="background-color: #FFC107; color: #111C44; border-radius: 8px; padding: 6px 12px; font-weight: 600;">
+          ⚙️ จัดการระบบ
+        </a>
+        <button onclick="logout()" style="background:none;border:none;cursor:pointer;text-decoration:none;color:var(--primary-text);font-weight:600;padding:6px 12px;border-radius:8px;font-size:0.95rem;">
+          Log Out
+        </button>
+        <button id="profile-btn-admin" class="profile-icon" aria-label="Profile">
+          <img id="profile-img-admin" src="" alt="Profile" style="display:none;">
+          <span id="profile-fallback-admin">👤</span>
+        </button>
       </div>
     </div>
   </nav>
@@ -34,114 +172,51 @@
   <main class="max-w-6xl mx-auto px-4 py-10">
     <div class="flex flex-col md:flex-row md:items-end md:justify-between gap-4 mb-6">
       <div>
-        <h1 class="text-2xl md:text-3xl font-bold text-green-900">à¸„à¸¥à¸±à¸‡à¸ªà¸¡à¸¸à¸™à¹„à¸žà¸£à¸—à¸±à¹‰à¸‡à¸«à¸¡à¸”</h1>
-        <p class="text-sm text-gray-600">à¹à¸ªà¸”à¸‡à¸‚à¹‰à¸­à¸¡à¸¹à¸¥à¸ˆà¸²à¸à¸à¸²à¸™à¸‚à¹‰à¸­à¸¡à¸¹à¸¥à¸¥à¹ˆà¸²à¸ªà¸¸à¸”</p>
+        <h1 class="text-2xl md:text-3xl font-bold text-green-900">คลังสมุนไพรทั้งหมด</h1>
+        <p class="text-sm text-gray-600">แสดงข้อมูลจากฐานข้อมูลล่าสุด</p>
       </div>
       <div class="w-full md:w-72">
-        <input id="herb-search" type="search" placeholder="à¸„à¹‰à¸™à¸«à¸²à¸Šà¸·à¹ˆà¸­à¸ªà¸¡à¸¸à¸™à¹„à¸žà¸£à¸«à¸£à¸·à¸­à¸ªà¸£à¸£à¸žà¸„à¸¸à¸“..."
+        <input id="herb-search" type="search" placeholder="ค้นหาชื่อสมุนไพรหรือสรรพคุณ..."
           class="w-full bg-white/80 border border-green-100 rounded-xl px-4 py-2 focus:outline-none focus:ring-2 focus:ring-green-400">
       </div>
     </div>
 
     <div id="herb-grid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
       <div class="col-span-full text-center text-gray-500 bg-white/60 rounded-2xl py-10 border border-dashed border-green-200">
-        à¸à¸³à¸¥à¸±à¸‡à¹‚à¸«à¸¥à¸”à¸‚à¹‰à¸­à¸¡à¸¹à¸¥à¸ªà¸¡à¸¸à¸™à¹„à¸žà¸£...
+        กำลังโหลดข้อมูลสมุนไพร...
       </div>
     </div>
   </main>
 
+  <script src="/js/herb_library.js?v=force_new_1"></script>
+  <script src="/js/auth.js?v=20260211r11"></script>
+  <script src="/js/profile-drawer.js?v=20260211r1"></script>
   <script>
-    const API_BASE_URL = window.location.hostname.includes('netlify.app')
-      ? 'https://skinherbcareweb1.onrender.com'
-      : window.location.origin;
+    (function forceHerbLibraryNavState() {
+      const isLoggedIn = Boolean(
+        localStorage.getItem('token')
+        || localStorage.getItem('userToken')
+        || localStorage.getItem('user')
+        || sessionStorage.getItem('token')
+        || sessionStorage.getItem('userToken')
+        || sessionStorage.getItem('user')
+      );
+      const userRaw = localStorage.getItem('user') || sessionStorage.getItem('user');
+      let user = null;
+      try { user = userRaw ? JSON.parse(userRaw) : null; } catch (_) { user = null; }
+      const role = String(user?.role || user?.userRole || localStorage.getItem('userRole') || sessionStorage.getItem('userRole') || 'user').toLowerCase();
+      const isAdmin = isLoggedIn && role === 'admin';
 
-    function resolveImageSrc(raw) {
-      if (!raw) return '';
-      const val = String(raw).trim();
-      if (!val) return '';
-      if (val.startsWith('http://') || val.startsWith('https://') || val.startsWith('data:')) return val;
-      if (val.startsWith('/uploads/')) return `${window.location.origin}${val}`;
-      const normalized = val.replace(/\\/g, '/');
-      const idx = normalized.lastIndexOf('/uploads/');
-      if (idx >= 0) return `${window.location.origin}${normalized.slice(idx)}`;
-      if (/\.(png|jpe?g|gif|webp)$/i.test(val)) return `${window.location.origin}/uploads/${val}`;
-      return val;
-    }
+      const guestNav = document.getElementById('guest-nav');
+      const adminNav = document.getElementById('admin-nav');
+      const loginLink = document.querySelector('#guest-nav a[href="/login.html"]');
+      const registerLink = document.querySelector('#guest-nav a[href="/register.html"]');
 
-    let allHerbs = [];
-
-    function renderHerbs(list) {
-      const grid = document.getElementById('herb-grid');
-      if (!list || list.length === 0) {
-        grid.innerHTML = '<div class="col-span-full text-center text-gray-500 bg-white/60 rounded-2xl py-10 border border-dashed border-green-200">à¸¢à¸±à¸‡à¹„à¸¡à¹ˆà¸¡à¸µà¸‚à¹‰à¸­à¸¡à¸¹à¸¥à¸ªà¸¡à¸¸à¸™à¹„à¸žà¸£</div>';
-        return;
-      }
-
-      const html = list.map((herb) => {
-        const propertiesText = Array.isArray(herb.properties) ? herb.properties.join(', ') : (herb.properties || '');
-        const shortDesc = propertiesText.length > 90 ? `${propertiesText.substring(0, 90)}...` : (propertiesText || 'à¹„à¸¡à¹ˆà¸¡à¸µà¸‚à¹‰à¸­à¸¡à¸¹à¸¥à¸ªà¸£à¸£à¸žà¸„à¸¸à¸“');
-        const imageSrc = resolveImageSrc(herb.image || '');
-        const herbId = herb._id || herb.id || '';
-
-        return `
-          <div class="card-glass rounded-2xl overflow-hidden flex flex-col">
-            <div class="h-44 bg-gray-100">
-              ${imageSrc ? `<img src="${imageSrc}" class="w-full h-full object-cover" alt="${herb.name || 'Herb'}">` : `<div class="h-full flex items-center justify-center text-gray-400">No Image</div>`}
-            </div>
-            <div class="p-5 flex flex-col gap-3">
-              <h3 class="text-lg font-bold text-slate-900">${herb.name || 'à¹„à¸¡à¹ˆà¸£à¸°à¸šà¸¸à¸Šà¸·à¹ˆà¸­'}</h3>
-              <p class="text-sm text-gray-600">${shortDesc}</p>
-              <a href="/herb_detail_public.html?id=${herbId}" class="mt-auto inline-flex items-center justify-center gap-2 text-sm font-bold text-green-800 bg-green-100 hover:bg-green-200 rounded-xl px-4 py-2">
-                à¸­à¹ˆà¸²à¸™à¹€à¸žà¸´à¹ˆà¸¡à¹€à¸•à¸´à¸¡
-              </a>
-            </div>
-          </div>
-        `;
-      }).join('');
-
-      grid.innerHTML = html;
-    }
-
-    async function loadHerbs() {
-      const grid = document.getElementById('herb-grid');
-      try {
-        const res = await fetch(`${API_BASE_URL}/api/herbs`);
-        if (!res.ok) throw new Error('à¹‚à¸«à¸¥à¸”à¸‚à¹‰à¸­à¸¡à¸¹à¸¥à¹„à¸¡à¹ˆà¸ªà¸³à¹€à¸£à¹‡à¸ˆ');
-        const json = await res.json();
-        const herbs = Array.isArray(json) ? json : (json.herbs || json.data || []);
-        allHerbs = Array.isArray(herbs) ? herbs : [];
-        renderHerbs(allHerbs);
-      } catch (e) {
-        console.error(e);
-        grid.innerHTML = '<div class="col-span-full text-center text-red-500 bg-white/60 rounded-2xl py-10 border border-dashed border-red-200">à¹€à¸à¸´à¸”à¸‚à¹‰à¸­à¸œà¸´à¸”à¸žà¸¥à¸²à¸”à¹ƒà¸™à¸à¸²à¸£à¹‚à¸«à¸¥à¸”à¸‚à¹‰à¸­à¸¡à¸¹à¸¥</div>';
-      }
-    }
-
-    function setupSearch() {
-      const input = document.getElementById('herb-search');
-      if (!input) return;
-      input.addEventListener('input', () => {
-        const q = input.value.trim().toLowerCase();
-        if (!q) {
-          renderHerbs(allHerbs);
-          return;
-        }
-        const filtered = allHerbs.filter((herb) => {
-          const props = Array.isArray(herb.properties) ? herb.properties.join(' ') : (herb.properties || '');
-          const hay = `${herb.name || ''} ${props}`.toLowerCase();
-          return hay.includes(q);
-        });
-        renderHerbs(filtered);
-      });
-    }
-
-    document.addEventListener('DOMContentLoaded', () => {
-      loadHerbs();
-      setupSearch();
-    });
+      if (guestNav) guestNav.style.display = isAdmin ? 'none' : 'flex';
+      if (adminNav) adminNav.style.display = isAdmin ? 'flex' : 'none';
+      if (loginLink) loginLink.style.display = isLoggedIn ? 'none' : '';
+      if (registerLink) registerLink.style.display = isLoggedIn ? 'none' : '';
+    })();
   </script>
-  <script src="/js/auth.js?v=20260211r2r2"></script>
 </body>
 </html>
-
-

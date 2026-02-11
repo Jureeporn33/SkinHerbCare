@@ -196,11 +196,19 @@ document.addEventListener('DOMContentLoaded', () => {
             const headers = {};
             if (apiKey) headers['X-API-Key'] = apiKey;
 
-            const res = await fetch(API_URL, {
-                method: 'POST',
-                headers,
-                body: formData
-            });
+            const controller = new AbortController();
+            const timeoutId = setTimeout(() => controller.abort(), 25000);
+            let res;
+            try {
+                res = await fetch(API_URL, {
+                    method: 'POST',
+                    headers,
+                    body: formData,
+                    signal: controller.signal
+                });
+            } finally {
+                clearTimeout(timeoutId);
+            }
 
             console.log('[Skin] Response status:', res.status);
 
@@ -218,6 +226,10 @@ document.addEventListener('DOMContentLoaded', () => {
             const diseaseInfo = await fetchDiseaseInfo(data.label_th, data.label_en);
             renderResult(data, diseaseInfo);
         } catch (err) {
+            if (err && err.name === 'AbortError') {
+                renderError('หมดเวลารอผลวิเคราะห์ กรุณาลองใหม่อีกครั้ง');
+                return;
+            }
             console.error('[Skin] Request failed:', err);
             renderError(err.message || 'ไม่สามารถเชื่อมต่อ API ได้');
         } finally {
