@@ -6,6 +6,10 @@ document.addEventListener('DOMContentLoaded', () => {
     applyAuthNavState();
 });
 
+window.addEventListener('pageshow', () => {
+    applyAuthNavState();
+});
+
 window.addEventListener('storage', (event) => {
     if (event.key === 'token' || event.key === 'userToken' || event.key === 'user' || event.key === 'userRole') {
         applyAuthNavState();
@@ -27,7 +31,8 @@ function applyAuthNavState() {
     const adminNav = document.getElementById('admin-nav') || document.getElementById('user-nav') || document.getElementById('user-menu');
     const adminLink = document.querySelector('#admin-nav a[href="/admin-dashboard.html"]');
 
-    const isLoggedIn = Boolean(token || userRaw);
+    // Treat token as source of truth for login state.
+    const isLoggedIn = Boolean(token);
 
     // Hide/show login/register links globally (covers pages with imperfect navbar markup)
     const loginLinks = Array.from(document.querySelectorAll('a[href$="/login.html"], a[href="login.html"]'));
@@ -97,6 +102,18 @@ function applyAuthNavState() {
             if (userRow) userRow.remove();
         }
     }
+}
+
+// Re-apply state in case other scripts re-render navbar after load.
+setInterval(() => {
+    applyAuthNavState();
+}, 1000);
+
+if (document.body) {
+    const observer = new MutationObserver(() => {
+        applyAuthNavState();
+    });
+    observer.observe(document.body, { childList: true, subtree: true });
 }
 
 function logout() {
