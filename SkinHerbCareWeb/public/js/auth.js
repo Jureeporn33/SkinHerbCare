@@ -19,17 +19,17 @@ function applyAuthNavState() {
         user = null;
     }
 
-    const guestNav = document.getElementById('guest-nav');
-    const adminNav = document.getElementById('admin-nav');
+    const guestNav = document.getElementById('guest-nav') || document.getElementById('guest-menu');
+    const adminNav = document.getElementById('admin-nav') || document.getElementById('user-nav') || document.getElementById('user-menu');
     const adminLink = document.querySelector('#admin-nav a[href="/admin-dashboard.html"]');
 
-    const isLoggedIn = Boolean(token || userRaw);
+    const isLoggedIn = Boolean(userRaw);
     if (guestNav) {
-        guestNav.style.display = isLoggedIn ? 'none' : 'flex';
+        guestNav.style.setProperty('display', isLoggedIn ? 'none' : 'flex', 'important');
         guestNav.classList.toggle('hidden', isLoggedIn);
     }
     if (adminNav) {
-        adminNav.style.display = isLoggedIn ? 'flex' : 'none';
+        adminNav.style.setProperty('display', isLoggedIn ? 'flex' : 'none', 'important');
         adminNav.classList.toggle('hidden', !isLoggedIn);
     }
     if (adminLink) adminLink.style.display = userRole === 'admin' ? 'inline-flex' : 'none';
