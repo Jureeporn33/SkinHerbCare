@@ -157,6 +157,14 @@ app.post('/api/skin/predict', upload.single('file'), async (req, res) => {
 // -------------------------------------------------------------
 // Status check
 // -------------------------------------------------------------
+app.get('/healthz', (req, res) => {
+    res.status(200).json({
+        ok: true,
+        service: 'skinherbcare-node',
+        ts: new Date().toISOString()
+    });
+});
+
 app.get('/status', async (req, res) => {
     const pythonUrl = process.env.PYTHON_API_URL;
 
