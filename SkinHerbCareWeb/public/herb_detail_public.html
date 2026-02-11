@@ -108,7 +108,7 @@
   </div>
 
   <script>
-    const API_BASE_URL = (window.location.hostname.includes('netlify.app') || window.location.hostname.includes('onrender.com'))
+    const API_BASE_URL = window.location.hostname.includes('netlify.app')
       ? 'https://skinherbcareweb1.onrender.com'
       : window.location.origin;
 
@@ -117,11 +117,11 @@
       const val = String(raw).trim();
       if (!val) return '';
       if (val.startsWith('http://') || val.startsWith('https://') || val.startsWith('data:')) return val;
-      if (val.startsWith('/uploads/')) return `${API_BASE_URL}${val}`;
+      if (val.startsWith('/uploads/')) return `${window.location.origin}${val}`;
       const normalized = val.replace(/\\/g, '/');
       const idx = normalized.lastIndexOf('/uploads/');
-      if (idx >= 0) return `${API_BASE_URL}${normalized.slice(idx)}`;
-      if (/\.(png|jpe?g|gif|webp)$/i.test(val)) return `${API_BASE_URL}/uploads/${val}`;
+      if (idx >= 0) return `${window.location.origin}${normalized.slice(idx)}`;
+      if (/\.(png|jpe?g|gif|webp)$/i.test(val)) return `${window.location.origin}/uploads/${val}`;
       return val;
     }
 

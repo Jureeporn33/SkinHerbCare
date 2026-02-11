@@ -1,6 +1,4 @@
-const ANALYZE_DISEASE_JS_VERSION = '20260211r2';
 document.addEventListener('DOMContentLoaded', async () => {
-    console.log('[analyze-disease.js] loaded', ANALYZE_DISEASE_JS_VERSION);
     const API_BASE_URL = window.location.hostname.includes('netlify.app')
         ? 'https://skinherbcareweb1.onrender.com'
         : window.location.origin;
@@ -16,19 +14,11 @@ document.addEventListener('DOMContentLoaded', async () => {
     }
 
     try {
-        const authController = new AbortController();
-        const authTimeoutId = setTimeout(() => authController.abort(), 12000);
-        let res;
-        try {
-            res = await fetch(`${API_BASE_URL}/api/auth/profile`, {
-                headers: {
-                    'Authorization': `Bearer ${token}`
-                },
-                signal: authController.signal
-            });
-        } finally {
-            clearTimeout(authTimeoutId);
-        }
+        const res = await fetch(`${API_BASE_URL}/api/auth/profile`, {
+            headers: {
+                'Authorization': `Bearer ${token}`
+            }
+        });
         if (!res.ok) {
             localStorage.removeItem('token');
             localStorage.removeItem('userToken');

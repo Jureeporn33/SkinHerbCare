@@ -122,33 +122,6 @@ const fallbackAnalyze = async (symptomsText) => {
         const tokens = tokenize(symptomsText);
         if (tokens.length === 0) return [];
 
-        // Prefer published diseases from DB so admin-published content appears in recommendations.
-        const publishedDiseases = await Disease.find({ published: true }).lean();
-        if (Array.isArray(publishedDiseases) && publishedDiseases.length > 0) {
-            const scoredPublished = publishedDiseases.map((d) => {
-                const text = buildDiseaseText(d);
-                let hits = 0;
-                tokens.forEach((t) => {
-                    if (text.includes(t)) hits += 1;
-                });
-                const score = hits / tokens.length;
-                return { d, score };
-            }).filter(item => item.score > 0);
-
-            if (scoredPublished.length > 0) {
-                scoredPublished.sort((a, b) => b.score - a.score);
-                return scoredPublished.slice(0, 3).map(({ d, score }) => ({
-                    disease: d.name,
-                    confidence: Math.round(score * 100),
-                    main_symptoms: Array.isArray(d.symptoms) ? d.symptoms.join(', ') : (d.symptoms || ''),
-                    secondary_symptoms: '',
-                    recommendation: d.usage || d.description || '',
-                    location: '',
-                    cause: ''
-                }));
-            }
-        }
-
         const excelRows = loadExcelData();
         if (Array.isArray(excelRows) && excelRows.length > 0) {
             const scored = excelRows.map((row) => {
@@ -179,7 +152,29 @@ const fallbackAnalyze = async (symptomsText) => {
             }));
         }
 
-        return [];
+        const diseases = await Disease.find({}).lean();
+        if (!Array.isArray(diseases) || diseases.length === 0) return [];
+
+        const scored = diseases.map((d) => {
+            const text = buildDiseaseText(d);
+            let hits = 0;
+            tokens.forEach((t) => {
+                if (text.includes(t)) hits += 1;
+            });
+            const score = hits / tokens.length;
+            return { d, score };
+        }).filter(item => item.score > 0);
+
+        scored.sort((a, b) => b.score - a.score);
+        return scored.slice(0, 3).map(({ d, score }) => ({
+            disease: d.name,
+            confidence: Math.round(score * 100),
+            main_symptoms: Array.isArray(d.symptoms) ? d.symptoms.join(', ') : (d.symptoms || ''),
+            secondary_symptoms: '',
+            recommendation: d.usage || d.description || '',
+            location: '',
+            cause: ''
+        }));
     } catch (e) {
         return [];
     }

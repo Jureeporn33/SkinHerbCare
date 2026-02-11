@@ -145,9 +145,6 @@
 
     <script>
         let currentHerbId = null;
-        const API_BASE_URL = (window.location.hostname.includes('netlify.app') || window.location.hostname.includes('onrender.com'))
-            ? 'https://skinherbcareweb1.onrender.com'
-            : window.location.origin;
 
         function applyHerbData(data) {
             if (!data) return;
@@ -187,7 +184,7 @@
 
         async function loadHerbFromApi(id) {
             try {
-                const res = await fetch(`${API_BASE_URL}/api/herbs/${id}`);
+                const res = await fetch(`/api/herbs/${id}`);
                 if (!res.ok) throw new Error('not found');
                 const json = await res.json();
                 const herb = json.herb || json.data || json;
@@ -240,11 +237,11 @@
             const val = String(raw).trim();
             if (!val) return '';
             if (val.startsWith('http://') || val.startsWith('https://') || val.startsWith('data:')) return val;
-            if (val.startsWith('/uploads/')) return `${API_BASE_URL}${val}`;
+            if (val.startsWith('/uploads/')) return `${window.location.origin}${val}`;
             const normalized = val.replace(/\\/g, '/');
             const idx = normalized.lastIndexOf('/uploads/');
-            if (idx >= 0) return `${API_BASE_URL}${normalized.slice(idx)}`;
-            if (/\.(png|jpe?g|gif|webp)$/i.test(val)) return `${API_BASE_URL}/uploads/${val}`;
+            if (idx >= 0) return `${window.location.origin}${normalized.slice(idx)}`;
+            if (/\.(png|jpe?g|gif|webp)$/i.test(val)) return `${window.location.origin}/uploads/${val}`;
             return val;
         }
     </script>

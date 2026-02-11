@@ -1,6 +1,4 @@
-const ANALYZE_HERB_JS_VERSION = '20260211r2';
 document.addEventListener('DOMContentLoaded', async () => {
-    console.log('[analyze-herb.js] loaded', ANALYZE_HERB_JS_VERSION);
     const token = localStorage.getItem('token') || localStorage.getItem('userToken');
     const userRaw = localStorage.getItem('user');
     const API_BASE_URL = window.location.hostname.includes('netlify.app')
@@ -17,19 +15,11 @@ document.addEventListener('DOMContentLoaded', async () => {
     }
 
     try {
-        const authController = new AbortController();
-        const authTimeoutId = setTimeout(() => authController.abort(), 12000);
-        let res;
-        try {
-            res = await fetch(apiUrl('/api/auth/profile'), {
-                headers: {
-                    'Authorization': `Bearer ${token}`
-                },
-                signal: authController.signal
-            });
-        } finally {
-            clearTimeout(authTimeoutId);
-        }
+        const res = await fetch(apiUrl('/api/auth/profile'), {
+            headers: {
+                'Authorization': `Bearer ${token}`
+            }
+        });
         if (!res.ok) {
             localStorage.removeItem('token');
             localStorage.removeItem('userToken');
