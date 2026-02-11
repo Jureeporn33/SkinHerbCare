@@ -23,7 +23,15 @@ function applyAuthNavState() {
     const adminNav = document.getElementById('admin-nav') || document.getElementById('user-nav') || document.getElementById('user-menu');
     const adminLink = document.querySelector('#admin-nav a[href="/admin-dashboard.html"]');
 
-    const isLoggedIn = Boolean(userRaw);
+    const isLoggedIn = Boolean(token || userRaw);
+
+    // Hide/show login/register links globally (covers pages with imperfect navbar markup)
+    const loginLinks = Array.from(document.querySelectorAll('a[href$="/login.html"], a[href="login.html"]'));
+    const registerLinks = Array.from(document.querySelectorAll('a[href$="/register.html"], a[href="register.html"]'));
+    const allAuthLinks = [...loginLinks, ...registerLinks];
+    allAuthLinks.forEach((el) => {
+        el.style.setProperty('display', isLoggedIn ? 'none' : '', 'important');
+    });
     if (guestNav) {
         guestNav.style.setProperty('display', isLoggedIn ? 'none' : 'flex', 'important');
         guestNav.classList.toggle('hidden', isLoggedIn);
@@ -36,28 +44,30 @@ function applyAuthNavState() {
 
     // Fallback for pages that still use old navbar markup without guest-nav/admin-nav.
     if (!guestNav && !adminNav) {
-        const loginLinks = Array.from(document.querySelectorAll('a[href$="/login.html"], a[href="login.html"]'));
-        const registerLinks = Array.from(document.querySelectorAll('a[href$="/register.html"], a[href="register.html"]'));
-        const allAuthLinks = [...loginLinks, ...registerLinks];
-        allAuthLinks.forEach((el) => {
-            el.style.display = isLoggedIn ? 'none' : '';
-        });
-
-        // Use the nearest visible auth container to inject a logout button.
-        const target = allAuthLinks.find((el) => el.offsetParent !== null)?.parentElement;
+        const target = allAuthLinks[0]?.parentElement;
         if (!target) return;
 
+        let userRow = target.querySelector('[data-auth-user-row="true"]');
         let logoutBtn = target.querySelector('[data-auth-logout="true"]');
         let userLabel = target.querySelector('[data-auth-user="true"]');
 
         if (isLoggedIn) {
+            if (!userRow) {
+                userRow = document.createElement('div');
+                userRow.setAttribute('data-auth-user-row', 'true');
+                userRow.style.display = 'flex';
+                userRow.style.alignItems = 'center';
+                userRow.style.gap = '8px';
+                userRow.style.marginLeft = '8px';
+                target.appendChild(userRow);
+            }
+
             if (!userLabel) {
                 userLabel = document.createElement('span');
                 userLabel.setAttribute('data-auth-user', 'true');
                 userLabel.style.fontWeight = '700';
                 userLabel.style.color = '#1f2937';
-                userLabel.style.marginLeft = '6px';
-                target.appendChild(userLabel);
+                userRow.appendChild(userLabel);
             }
             userLabel.textContent = (user && (user.firstName || user.name || user.username)) || 'User';
 
@@ -74,11 +84,13 @@ function applyAuthNavState() {
                 logoutBtn.style.color = '#dc2626';
                 logoutBtn.style.cursor = 'pointer';
                 logoutBtn.addEventListener('click', logout);
-                target.appendChild(logoutBtn);
+                userRow.appendChild(logoutBtn);
             }
+            userRow.style.display = 'flex';
         } else {
             if (logoutBtn) logoutBtn.remove();
             if (userLabel) userLabel.remove();
+            if (userRow) userRow.remove();
         }
     }
 }
