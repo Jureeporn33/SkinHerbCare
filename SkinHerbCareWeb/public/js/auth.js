@@ -1,4 +1,8 @@
+const AUTH_JS_VERSION = '20260211r2';
+
 document.addEventListener('DOMContentLoaded', () => {
+    document.documentElement.setAttribute('data-auth-js', AUTH_JS_VERSION);
+    console.log('[auth.js] loaded', AUTH_JS_VERSION);
     applyAuthNavState();
 });
 
