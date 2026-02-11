@@ -1,11 +1,16 @@
-import express from 'express';
-import { getSalesData, getCategoryData } from '../../controllers/analysisController.js';
-// import { protect, admin } from '../middleware/auth.js'; // Optional: Add security later
+import express from "express";
+import axios from "axios";
 
 const router = express.Router();
 
-// All routes here will be prefixed with /api/analysis
-router.route('/sales').get(getSalesData); // GET /api/analysis/sales
-router.route('/categories').get(getCategoryData); // GET /api/analysis/categories
+import { diagnoseSymptoms } from '../controllers/analysisController.js';
+
+/**
+ * POST /api/analysis/analyze
+ * POST /api/analysis/diagnose
+ * ทั้งสอง route จะเรียก controller เดียวกัน เพื่อความเข้ากันได้ย้อนหลัง
+ */
+router.post('/analyze', diagnoseSymptoms);
+router.post('/diagnose', diagnoseSymptoms);
 
 export default router;

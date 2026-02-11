@@ -4,8 +4,14 @@ import bcrypt from 'bcryptjs';
 const userSchema = new mongoose.Schema({
   firstName: { type: String, required: true },
   lastName: { type: String, required: true },
+  
+  // ✅✅ เพิ่ม 2 บรรทัดนี้ครับ ✅✅
+  age: { type: Number, required: true },
+  occupation: { type: String, required: true },
+  // ------------------------------------
+
   email: { type: String, required: true, unique: true, lowercase: true },
-  password: { type: String, required: true, select: false }, // select: false hides it by default
+  password: { type: String, required: true, select: false },
   role: { type: String, enum: ['user', 'admin'], default: 'user' },
 }, { timestamps: true });
 

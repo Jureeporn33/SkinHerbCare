@@ -7,10 +7,34 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@400;700&display=swap" rel="stylesheet">
     <style>
-        body { font-family: 'Sarabun', sans-serif; }
+        body { 
+            font-family: 'Sarabun', sans-serif;
+            background: linear-gradient(160deg, #e0f2f1, #dcfce7);
+        }
+        
+        /* 🌿 Background decoration */
+        body::before, body::after {
+            position: fixed;
+            z-index: -1;
+            opacity: 0.35;
+        }
+        body::before {
+            content: "🌿";
+            bottom: -60px;
+            left: -60px;
+            font-size: 260px;
+            transform: rotate(-25deg);
+        }
+        body::after {
+            content: "🌿";
+            top: -80px;
+            right: -80px;
+            font-size: 300px;
+            transform: rotate(20deg);
+        }
     </style>
 </head>
-<body class="bg-gray-100 flex items-center justify-center min-h-screen">
+<body class="flex items-center justify-center min-h-screen px-4 py-6">
 
     <div class="w-full max-w-md bg-white rounded-xl shadow-2xl p-8 m-4">
         <div class="text-center mb-8">
@@ -19,7 +43,6 @@
         </div>
 
         <form id="login-form">
-            <!-- Email Input -->
             <div class="mb-4">
                 <label for="email" class="block text-gray-700 text-sm font-bold mb-2">อีเมล</label>
                 <input type="email" id="email" name="email"
@@ -27,7 +50,6 @@
                     placeholder="you@example.com" required>
             </div>
 
-            <!-- Password Input -->
             <div class="mb-6">
                 <label for="password" class="block text-gray-700 text-sm font-bold mb-2">รหัสผ่าน</label>
                 <input type="password" id="password" name="password"
@@ -35,12 +57,10 @@
                     placeholder="••••••••" required>
             </div>
 
-            <!-- Error Message Placeholder -->
-            <div id="error-message" class="text-red-500 text-center text-sm mb-4 h-5"></div>
+            <div id="error-message" class="hidden bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative mb-4 text-center text-sm"></div>
 
-            <!-- Submit Button -->
             <div>
-                <button type="submit"
+                <button type="submit" id="submit-btn"
                     class="w-full bg-green-600 hover:bg-green-700 text-white font-bold py-3 px-4 rounded-lg focus:outline-none focus:shadow-outline transition duration-300">
                     เข้าสู่ระบบ
                 </button>
@@ -55,44 +75,75 @@
     </div>
     
     <script>
-        const form = document.getElementById('login-form');
-        const errorMessage = document.getElementById('error-message');
+        // ✅ ลิงก์ Backend ถูกต้องแล้ว
+        const API_BASE_URL = window.location.hostname.includes('netlify.app')
+            ? 'https://skinherbcareweb1.onrender.com'
+            : window.location.origin;
 
-        form.addEventListener('submit', async (e) => {
-            e.preventDefault();
-            errorMessage.textContent = '';
+        document.addEventListener('DOMContentLoaded', () => {
+            const loginForm = document.getElementById('login-form');
+            const emailInput = document.getElementById('email');
+            const passwordInput = document.getElementById('password');
+            const errorMessage = document.getElementById('error-message');
+            const submitBtn = document.getElementById('submit-btn');
 
-            const email = form.email.value;
-            const password = form.password.value;
+            loginForm.addEventListener('submit', async (e) => {
+                e.preventDefault();
+                
+                // Reset Error
+                errorMessage.textContent = '';
+                errorMessage.classList.add('hidden');
+                
+                const originalBtnText = submitBtn.innerText;
+                submitBtn.disabled = true;
+                submitBtn.innerText = 'กำลังตรวจสอบ...';
 
-            try {
-                const response = await fetch('/api/auth/login', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ email, password }),
-                });
+                // ตัดช่องว่างอีเมล
+                const email = emailInput.value.trim();
+                const password = passwordInput.value;
 
-                const data = await response.json();
+                try {
+                    // ✅ ใช้ API_BASE_URL เชื่อมต่อไปยัง Server
+                    const response = await fetch(`${API_BASE_URL}/api/auth/login`, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ email, password }),
+                    });
 
-                if (data.success) {
-                    // Login successful
-                    localStorage.setItem('token', data.token);
-                    localStorage.setItem('user', JSON.stringify(data));
-                    
-                    // Redirect based on role
-                    if(data.role === 'admin') {
-                        window.location.href = '/admin-dashboard.html';
+                    const contentType = response.headers.get('content-type') || '';
+                    const isJson = contentType.includes('application/json');
+                    const data = isJson ? await response.json() : null;
+                    const rawText = !isJson ? await response.text() : '';
+
+                    if (response.ok && data && data.success) {
+                        // --- Login สำเร็จ ---
+                        // เก็บ Token ไว้ใช้งาน
+                        localStorage.setItem('token', data.token);
+                        // เก็บข้อมูล User ไว้แสดงผล
+                        localStorage.setItem('user', JSON.stringify(data.user || data));
+                        // เก็บ Role ไว้ใช้งาน (admin หรือ user)
+                        localStorage.setItem('userRole', data.role || 'user');
+                        
+                        // Redirect ไปที่หน้าแรกของเว็บไซต์ (index) หลังจากล็อคอินเรียบร้อย
+                        // Previously redirected to role-specific dashboards — now send users to the public index
+                        window.location.href = '/index.html';
                     } else {
-                        window.location.href = '/user-dashboard.html';
+                        // --- Login ไม่สำเร็จ ---
+                        const msg = (data && data.message)
+                            ? data.message
+                            : (rawText ? 'การตอบกลับจากเซิร์ฟเวอร์ไม่ถูกต้อง' : 'อีเมลหรือรหัสผ่านไม่ถูกต้อง');
+                        throw new Error(msg);
                     }
-                } else {
-                    // Login failed
-                    errorMessage.textContent = data.message || 'อีเมลหรือรหัสผ่านไม่ถูกต้อง';
+
+                } catch (error) {
+                    console.error('Login Error:', error);
+                    errorMessage.textContent = error.message;
+                    errorMessage.classList.remove('hidden');
+                } finally {
+                    submitBtn.disabled = false;
+                    submitBtn.innerText = originalBtnText;
                 }
-            } catch (error) {
-                console.error('Login error:', error);
-                errorMessage.textContent = 'เกิดข้อผิดพลาดในการเชื่อมต่อเซิร์ฟเวอร์';
-            }
+            });
         });
     </script>
 </body>

@@ -3,147 +3,204 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ลงทะเบียน - SkinHerbCare</title>
+    <title>ลงทะเบียนสมาชิก - SkinHerbCare</title>
 
-    <!-- ✅ ใช้ Tailwind CSS สำหรับตกแต่ง -->
+    <!-- Tailwind -->
     <script src="https://cdn.tailwindcss.com"></script>
 
-    <!-- ✅ โหลดฟอนต์ Sarabun จาก Google Fonts -->
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@400;500;700&display=swap" rel="stylesheet">
+    <!-- Font -->
+    <link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@400;700&display=swap" rel="stylesheet">
 
     <style>
-        /* ✅ กำหนดฟอนต์หลักของทั้งหน้า */
-        body {
+        body { 
             font-family: 'Sarabun', sans-serif;
+            background: linear-gradient(160deg, #e0f2f1, #dcfce7);
         }
-
-        /* ✅ สไตล์เมื่อรหัสผ่านไม่ตรงกัน */
+        
+        /* 🌿 Background decoration */
+        body::before, body::after {
+            position: fixed;
+            z-index: -1;
+            opacity: 0.35;
+        }
+        body::before {
+            content: "🌿";
+            bottom: -60px;
+            left: -60px;
+            font-size: 260px;
+            transform: rotate(-25deg);
+        }
+        body::after {
+            content: "🌿";
+            top: -80px;
+            right: -80px;
+            font-size: 300px;
+            transform: rotate(20deg);
+        }
+        
         .password-mismatch {
-            border-color: #ef4444; /* สีแดง (red-500) */
+            border-color: #ef4444 !important;
+            background-color: #fef2f2;
         }
     </style>
 </head>
 
-<body class="bg-green-50 flex items-center justify-center min-h-screen">
-    <!-- ✅ กล่องหลักของหน้า -->
-    <main class="bg-white p-8 md:p-10 rounded-xl shadow-2xl w-full max-w-md m-4">
-        
-        <!-- ✅ ส่วนหัวของหน้า -->
-        <div class="text-center mb-8">
-            <h1 class="text-4xl font-bold text-green-800">🌿 สร้างบัญชีใหม่</h1>
-            <p class="text-gray-500 mt-2">เข้าร่วมกับเราเพื่อผิวสวยสุขภาพดี</p>
+<body class="flex items-center justify-center min-h-screen px-4 py-6">
+
+    <div class="w-full max-w-lg bg-white rounded-xl shadow-xl p-6 sm:p-8">
+        <div class="text-center mb-6">
+            <h1 class="text-2xl sm:text-3xl font-bold text-green-800">🌿 ลงทะเบียนสมาชิก</h1>
+            <p class="text-gray-500 mt-2 text-sm sm:text-base">
+                สร้างบัญชีเพื่อเริ่มต้นใช้งาน SkinHerbCare
+            </p>
         </div>
 
-        <!-- ✅ ฟอร์มลงทะเบียน -->
-        <form id="registerForm">
-            
-            <!-- 🔸 ช่องกรอกชื่อและนามสกุล (แบ่งเป็น 2 คอลัมน์บนหน้าจอใหญ่) -->
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
-                <div>
-                    <label for="firstName" class="block text-sm font-medium text-gray-700 mb-1">ชื่อ</label>
-                    <input type="text" id="firstName" name="firstName" required
-                        class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm
-                               focus:outline-none focus:ring-green-500 focus:border-green-500 transition">
-                </div>
+        <form id="registerForm" class="space-y-4">
 
+            <!-- ชื่อ / นามสกุล -->
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
-                    <label for="lastName" class="block text-sm font-medium text-gray-700 mb-1">นามสกุล</label>
-                    <input type="text" id="lastName" name="lastName" required
-                        class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm
-                               focus:outline-none focus:ring-green-500 focus:border-green-500 transition">
+                    <label class="block text-sm font-bold mb-1">ชื่อ</label>
+                    <input id="firstName" type="text" required
+                        class="w-full px-4 py-2 rounded-lg border bg-gray-50 focus:border-green-500 focus:outline-none">
+                </div>
+                <div>
+                    <label class="block text-sm font-bold mb-1">นามสกุล</label>
+                    <input id="lastName" type="text" required
+                        class="w-full px-4 py-2 rounded-lg border bg-gray-50 focus:border-green-500 focus:outline-none">
                 </div>
             </div>
 
-            <!-- 🔸 ช่องกรอกอีเมล -->
-            <div class="mb-4">
-                <label for="email" class="block text-sm font-medium text-gray-700 mb-1">อีเมล</label>
-                <input type="email" id="email" name="email" required
-                    class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm
-                           focus:outline-none focus:ring-green-500 focus:border-green-500 transition"
-                    placeholder="you@example.com">
+            <!-- อายุ / อาชีพ -->
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div>
+                    <label class="block text-sm font-bold mb-1">อายุ</label>
+                    <input id="age" type="number" min="1" required
+                        class="w-full px-4 py-2 rounded-lg border bg-gray-50 focus:border-green-500 focus:outline-none">
+                </div>
+                <div>
+                    <label class="block text-sm font-bold mb-1">อาชีพ</label>
+                    <input id="occupation" type="text" required
+                        class="w-full px-4 py-2 rounded-lg border bg-gray-50 focus:border-green-500 focus:outline-none">
+                </div>
             </div>
 
-            <!-- 🔸 ช่องกรอกรหัสผ่าน -->
-            <div class="mb-4">
-                <label for="password" class="block text-sm font-medium text-gray-700 mb-1">รหัสผ่าน</label>
-                <input type="password" id="password" name="password" required
-                    class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm
-                           focus:outline-none focus:ring-green-500 focus:border-green-500 transition">
+            <!-- Email -->
+            <div>
+                <label class="block text-sm font-bold mb-1">อีเมล</label>
+                <input id="email" type="email" required
+                    class="w-full px-4 py-2 rounded-lg border bg-gray-50 focus:border-green-500 focus:outline-none">
             </div>
 
-            <!-- 🔸 ช่องยืนยันรหัสผ่าน -->
-            <div class="mb-6">
-                <label for="confirmPassword" class="block text-sm font-medium text-gray-700 mb-1">ยืนยันรหัสผ่าน</label>
-                <input type="password" id="confirmPassword" name="confirmPassword" required
-                    class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm
-                           focus:outline-none focus:ring-green-500 focus:border-green-500 transition">
-                <!-- ✅ ข้อความแสดงเมื่อรหัสผ่านไม่ตรง -->
-                <p id="passwordError" class="text-red-500 text-xs mt-1 hidden">รหัสผ่านไม่ตรงกัน</p>
+            <!-- Password -->
+            <div>
+                <label class="block text-sm font-bold mb-1">รหัสผ่าน</label>
+                <input id="password" type="password" required
+                    class="w-full px-4 py-2 rounded-lg border bg-gray-50 focus:border-green-500 focus:outline-none">
             </div>
-            
-            <!-- 🔘 ปุ่มลงทะเบียน -->
-            <button type="submit"
-                class="w-full bg-green-600 text-white font-bold py-3 px-4 rounded-lg
-                       hover:bg-green-700 focus:outline-none focus:ring-2
-                       focus:ring-offset-2 focus:ring-green-500 transition duration-300">
+
+            <!-- Confirm Password -->
+            <div>
+                <label class="block text-sm font-bold mb-1">ยืนยันรหัสผ่าน</label>
+                <input id="confirmPassword" type="password" required
+                    class="w-full px-4 py-2 rounded-lg border bg-gray-50 focus:border-green-500 focus:outline-none">
+                <p id="passwordError" class="hidden text-red-500 text-xs mt-1 font-bold">
+                    ❌ รหัสผ่านไม่ตรงกัน
+                </p>
+            </div>
+
+            <!-- Server error -->
+            <div id="serverError"
+                class="hidden bg-red-100 border border-red-400 text-red-700 px-4 py-2 rounded text-center text-sm">
+            </div>
+
+            <button id="submitBtn" type="submit"
+                class="w-full bg-green-600 hover:bg-green-700 text-white font-bold py-3 rounded-lg transition">
                 ลงทะเบียน
             </button>
         </form>
 
-        <!-- 🔗 ลิงก์ไปหน้าเข้าสู่ระบบ -->
-        <p class="text-center text-sm text-gray-600 mt-6">
+        <div class="text-center mt-6 text-sm">
             มีบัญชีอยู่แล้ว?
-            <a href="/login.html" class="font-medium text-green-600 hover:text-green-500">
-                เข้าสู่ระบบที่นี่
+            <a href="/login.html" class="font-bold text-green-600 hover:underline">
+                เข้าสู่ระบบ
             </a>
-        </p>
+        </div>
+    </div>
 
-    </main>
+<script>
+const API_BASE_URL = 'https://skinherbcareweb1.onrender.com'; // ✅ Backend URL
 
-    <!-- ✅ สคริปต์ตรวจสอบรหัสผ่าน -->
-    <script>
-        // ดึง element ที่ต้องใช้
-        const form = document.getElementById('registerForm');
-        const password = document.getElementById('password');
-        const confirmPassword = document.getElementById('confirmPassword');
-        const passwordError = document.getElementById('passwordError');
+document.addEventListener('DOMContentLoaded', () => {
 
-        // ✅ ฟังก์ชันตรวจสอบว่ารหัสผ่านตรงกันไหม
-        const checkPasswords = () => {
-            if (password.value !== confirmPassword.value && confirmPassword.value !== '') {
-                // ถ้าไม่ตรง: ใส่ขอบแดง + แสดงข้อความเตือน
-                confirmPassword.classList.add('password-mismatch');
-                passwordError.classList.remove('hidden');
-                return false;
-            } else {
-                // ถ้าตรง: ลบขอบแดง + ซ่อนข้อความเตือน
-                confirmPassword.classList.remove('password-mismatch');
-                passwordError.classList.add('hidden');
-                return true;
+    const form = document.getElementById('registerForm');
+    const firstName = document.getElementById('firstName');
+    const lastName = document.getElementById('lastName');
+    const age = document.getElementById('age');
+    const occupation = document.getElementById('occupation');
+    const email = document.getElementById('email');
+    const password = document.getElementById('password');
+    const confirmPassword = document.getElementById('confirmPassword');
+    const passwordError = document.getElementById('passwordError');
+    const serverError = document.getElementById('serverError');
+    const submitBtn = document.getElementById('submitBtn');
+
+    function validatePassword() {
+        if (password.value !== confirmPassword.value && confirmPassword.value !== '') {
+            confirmPassword.classList.add('password-mismatch');
+            passwordError.classList.remove('hidden');
+            return false;
+        }
+        confirmPassword.classList.remove('password-mismatch');
+        passwordError.classList.add('hidden');
+        return true;
+    }
+
+    password.addEventListener('input', validatePassword);
+    confirmPassword.addEventListener('input', validatePassword);
+
+    form.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        serverError.classList.add('hidden');
+
+        if (!validatePassword()) return;
+
+        submitBtn.disabled = true;
+        submitBtn.innerText = 'กำลังบันทึกข้อมูล...';
+
+        try {
+            const response = await fetch(`${API_BASE_URL}/api/auth/register`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    firstName: firstName.value.trim(),
+                    lastName: lastName.value.trim(),
+                    age: parseInt(age.value),
+                    occupation: occupation.value.trim(),
+                    email: email.value.trim(),
+                    password: password.value
+                })
+            });
+
+            const data = await response.json();
+
+            if (!response.ok || !data.success) {
+                throw new Error(data.message || 'สมัครสมาชิกไม่สำเร็จ');
             }
-        };
 
-        // ✅ ตรวจสอบรหัสผ่านทุกครั้งที่พิมพ์
-        password.addEventListener('input', checkPasswords);
-        confirmPassword.addEventListener('input', checkPasswords);
+            alert('✅ สมัครสมาชิกสำเร็จ');
+            window.location.href = '/login.html';
 
-        // ✅ เมื่อกดปุ่ม “ลงทะเบียน”
-        form.addEventListener('submit', (event) => {
-            event.preventDefault(); // ป้องกันไม่ให้ฟอร์มรีเฟรชหน้า
-            const passwordsMatch = checkPasswords();
-            
-            if (passwordsMatch) {
-                // ถ้ารหัสผ่านตรง
-                console.log('Form is valid and ready to be submitted.');
-                alert('การลงทะเบียนสำเร็จ! (นี่คือตัวอย่างฝั่ง Frontend)');
-            } else {
-                // ถ้าไม่ตรง
-                console.log('Form submission blocked due to password mismatch.');
-                alert('กรุณาตรวจสอบว่ารหัสผ่านของคุณตรงกัน');
-            }
-        });
-    </script>
+        } catch (err) {
+            serverError.textContent = err.message;
+            serverError.classList.remove('hidden');
+        } finally {
+            submitBtn.disabled = false;
+            submitBtn.innerText = 'ลงทะเบียน';
+        }
+    });
+});
+</script>
+
 </body>
 </html>

@@ -1,33 +1,31 @@
-import mongoose from 'mongoose';
+import mongoose from "mongoose";
 
 const connectDB = async () => {
   try {
-    // ปิด Warning ของ Mongoose
-    mongoose.set('strictQuery', false);
+    // Accept either MONGODB_URI (preferred) or legacy MONGO_URI
+    const mongoURI = process.env.MONGODB_URI || process.env.MONGO_URI;
 
-    // เช็คว่ามีค่า URI ใน .env ไหม
-    if (!process.env.MONGODB_URI) {
-      throw new Error('MONGODB_URI ไม่พบในไฟล์ .env กรุณาตรวจสอบ!');
+    if (!mongoURI) {
+      console.warn('⚠️ MONGODB_URI is not set — running in "no-db" degraded mode (endpoints using DB will return informative errors).');
+      return;
     }
 
-    console.log('🔍 Connecting to MongoDB...');
+    console.log('📡 Connecting to MongoDB...');
 
-    // เริ่มเชื่อมต่อ
-    const conn = await mongoose.connect(process.env.MONGODB_URI);
+    await mongoose.connect(mongoURI, {
+      // Wait a short time for server selection so startup doesn't hang forever
+      serverSelectionTimeoutMS: 5000,
+      socketTimeoutMS: 45000,
+    });
 
-    // ถ้าเชื่อมต่อสำเร็จ จะขึ้นข้อความนี้
-    console.log(`✅ MongoDB Connected: ${conn.connection.host}`);
-
+    console.log(`✅ MongoDB Connected: ${mongoose.connection.host} (${mongoose.connection.name})`);
   } catch (error) {
-    console.error(`❌ MongoDB Connection Error: ${error.message}`);
-    // ลบ process.exit(1) ออก หรือ comment ไว้
-    // process.exit(1); 
-
-    // อาจจะเพิ่ม logic ให้ retry connection ได้ในอนาคต
-    console.log("⚠️ Retrying connection in 5 seconds...");
-    setTimeout(connectDB, 5000);
+    console.error('❌ MongoDB Connection Error:', error.message);
+    if (error.code === 'ENOTFOUND' || /ENOTFOUND/i.test(error.message)) {
+      console.error('👉 Tip: Check MongoDB Atlas Network Access (IP whitelist). Try allowing 0.0.0.0/0 temporarily while debugging.');
+    }
+    // Do NOT exit the process — keep server running in degraded mode so health checks and non-DB endpoints remain available
   }
 };
 
-// **บรรทัดนี้สำคัญที่สุด** คือการส่งออกฟังก์ชันให้ server.js เรียกใช้ได้
 export default connectDB;

@@ -1,276 +1,812 @@
 <!DOCTYPE html>
 <html lang="th">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SkinHerbCare - AI Skin Analysis</title>
-    <!-- === ส่วนของการออกแบบ (Styling) === -->
-    <style>
-        /* --- การตั้งค่าพื้นฐาน --- */
-        /* Import ฟอนต์ Sarabun จาก Google Fonts */
-        @import url("https://fonts.googleapis.com/css2?family=Sarabun:wght@400;500;600;700&display=swap");
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SkinHerbCare - AI Skin Analysis</title>
 
-        /* กำหนดค่าสีหลักที่จะใช้ในหน้าเว็บ ทำให้แก้ไขสีได้ง่ายในที่เดียว */
-        :root {
-            --bg-gradient-start: #e0f2f1; /* สีพื้นหลังไล่เฉด (เริ่มต้น) */
-            --bg-gradient-end: #dcfce7;   /* สีพื้นหลังไล่เฉด (สิ้นสุด) */
-            --card-bg: rgba(255, 255, 255, 0.5); /* สีพื้นหลังของการ์ด (โปร่งแสง) */
-            --blur-strength: 15px; /* ความเบลอของพื้นหลังการ์ด */
-            --border-color: rgba(255, 255, 255, 0.2); /* สีเส้นขอบ */
-            --primary-text: #064e3b; /* สีตัวอักษรหลัก (เขียวเข้ม) */
-            --secondary-text: #1f2937; /* สีตัวอักษรรอง (เทาเข้ม) */
-        }
+<style>
+@import url("https://fonts.googleapis.com/css2?family=Sarabun:wght@400;500;600;700&display=swap");
 
-        /* --- การออกแบบ Body (ส่วนหลักของหน้า) --- */
-        body {
-            margin: 0;
-            padding: 0;
-            font-family: "Sarabun", sans-serif;
-            background-color: var(--bg-gradient-start);
-            background-image: linear-gradient(160deg, var(--bg-gradient-start) 0%, var(--bg-gradient-end) 100%);
-            color: var(--primary-text);
-            position: relative;
-        }
+:root {
+  --bg-gradient-start: #e0f2f1;
+  --bg-gradient-end: #dcfce7;
+  --card-bg: rgba(255, 255, 255, 0.55);
+  --blur-strength: 15px;
+  --border-color: rgba(255, 255, 255, 0.25);
+  --primary-text: #064e3b;
+  --secondary-text: #1f2937;
+}
 
-        /* --- องค์ประกอบตกแต่งพื้นหลัง --- */
-        /* สร้างใบไม้ตกแต่งที่มุมซ้ายล่างและขวาบนของหน้าจอ */
-        body::before {
-            content: '🌿';
-            position: fixed;
-            bottom: -50px;
-            left: -50px;
-            font-size: 250px;
-            color: rgba(255, 255, 255, 0.5);
-            transform: rotate(-30deg);
-            z-index: -1; /* ทำให้ใบไม้อยู่หลังเนื้อหาอื่น */
-        }
-         body::after {
-            content: '🌿';
-            position: fixed;
-            top: -80px;
-            right: -80px;
-            font-size: 300px;
-            color: rgba(255, 255, 255, 0.4);
-            transform: rotate(20deg);
-            z-index: -1;
-        }
+* {
+  box-sizing: border-box;
+}
 
-        /* --- แถบเมนูด้านบน (Navbar) --- */
-        .top-nav {
-            background: rgba(255, 255, 255, 0.3); /* พื้นหลังโปร่งแสง */
-            backdrop-filter: blur(10px); /* เอฟเฟกต์กระจกฝ้า */
-            -webkit-backdrop-filter: blur(10px);
-            padding: 15px 40px;
-            position: sticky; /* ทำให้เมนูเลื่อนตามหน้าจอ */
-            width: 100%;
-            top: 0;
-            left: 0;
-            box-sizing: border-box;
-            z-index: 100;
-            border-bottom: 1px solid var(--border-color);
-        }
-        .nav-container {
-            max-width: 1200px;
-            margin: 0 auto;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-        .logo {
-            font-size: 1.6rem;
-            font-weight: 700;
-            color: var(--primary-text);
-            text-decoration: none;
-        }
-        .auth-links {
-            display: flex;
-            gap: 10px;
-            align-items: center;
-        }
-        .auth-links a {
-            text-decoration: none;
-            padding: 8px 18px;
-            border-radius: 10px;
-            font-weight: 600;
-            transition: all 0.3s ease;
-        }
-        .login-btn:hover {
-            background-color: rgba(255, 255, 255, 0.5);
-        }
-        .profile-icon {
-            width: 40px;
-            height: 40px;
-            border-radius: 50%;
-            background-color: rgba(255, 255, 255, 0.5);
-            border: 1px solid var(--border-color);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            cursor: pointer;
-        }
+body {
+  margin: 0;
+  font-family: "Sarabun", sans-serif;
+  background: linear-gradient(160deg, var(--bg-gradient-start), var(--bg-gradient-end));
+  color: var(--primary-text);
+  overflow-x: hidden;
+}
 
-        /* --- ส่วนเนื้อหาหลัก --- */
-        .container {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            min-height: calc(100vh - 80px); /* ความสูงเต็มจอ (ลบความสูง Navbar) */
-            padding: 20px;
-            box-sizing: border-box;
-        }
-        .main-card {
-            background: var(--card-bg);
-            backdrop-filter: blur(var(--blur-strength));
-            -webkit-backdrop-filter: blur(var(--blur-strength));
-            border-radius: 24px;
-            padding: 30px 40px;
-            box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.1);
-            border: 1px solid var(--border-color);
-            text-align: center;
-            max-width: 600px;
-            width: 100%;
-        }
-        header h1 {
-            font-size: 2rem;
-            font-weight: 700;
-            color: var(--primary-text);
-            margin: 0 0 10px 0;
-        }
-        header p {
-            font-size: 1.1rem;
-            color: #374151;
-            margin-bottom: 2.5rem;
-        }
+/* 🌿 Background decoration */
+body::before,
+body::after {
+  position: fixed;
+  z-index: -1;
+  opacity: 0.35;
+}
+body::before {
+  content: "🌿";
+  bottom: -60px;
+  left: -60px;
+  font-size: 260px;
+  transform: rotate(-25deg);
+}
+body::after {
+  content: "🌿";
+  top: -80px;
+  right: -80px;
+  font-size: 300px;
+  transform: rotate(20deg);
+}
 
-        /* --- ปุ่มฟังก์ชัน 3 อัน --- */
-        .features {
-            display: flex;
-            flex-direction: column;
-            gap: 20px;
-        }
-        .feature-button {
-            background: linear-gradient(135deg, rgba(255,255,255,0.4), rgba(255,255,255,0.2));
-            border: 1px solid var(--border-color);
-            border-radius: 16px;
-            padding: 20px;
-            display: flex;
-            align-items: center;
-            text-align: left;
-            text-decoration: none;
-            color: var(--secondary-text);
-            transition: all 0.3s ease;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.05);
-        }
-        .feature-button:hover {
-            transform: translateY(-5px);
-            background: linear-gradient(135deg, rgba(255,255,255,0.6), rgba(255,255,255,0.4));
-            box-shadow: 0 10px 25px rgba(0,0,0,0.1);
-        }
+/* 🔝 Navbar */
+.top-nav {
+  position: sticky;
+  top: 0;
+  width: 100%;
+  padding: 12px 20px;
+  backdrop-filter: blur(10px);
+  background: rgba(255,255,255,0.35);
+  border-bottom: 1px solid var(--border-color);
+  z-index: 100;
+}
 
-        .feature-icon {
-            flex-shrink: 0;
-            width: 50px;
-            height: 50px;
-            border-radius: 12px;
-            background: white;
-            color: var(--primary-text);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            margin-right: 20px;
-            box-shadow: 0 4px 6px rgba(0,0,0,0.05);
-        }
-        .feature-content h3 {
-            font-size: 1.2rem;
-            font-weight: 600;
-            color: var(--primary-text);
-            margin: 0 0 5px 0;
-        }
-        .feature-content p {
-            margin: 0;
-            color: #4b5563;
-            font-size: 0.9rem;
-        }
-        
-    </style>
+.nav-container {
+  max-width: 1200px;
+  margin: auto;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 15px;
+  flex-wrap: wrap;
+}
+
+.logo {
+  font-size: 1.4rem;
+  font-weight: 700;
+  text-decoration: none;
+  color: var(--primary-text);
+  white-space: nowrap;
+}
+
+.auth-links {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+}
+
+.auth-links a {
+  text-decoration: none;
+  padding: 6px 12px;
+  border-radius: 8px;
+  font-weight: 600;
+  color: var(--primary-text);
+  font-size: 0.95rem;
+}
+
+.auth-links a:hover {
+  background: rgba(255,255,255,0.6);
+}
+
+/* ปุ่ม Admin พิเศษ */
+.admin-btn {
+    background-color: #FFC107 !important; /* สีเหลือง */
+    color: #111C44 !important;
+    display: none; /* ซ่อนไว้ก่อน */
+    align-items: center;
+    gap: 5px;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+}
+.admin-btn:hover {
+    background-color: #FFD54F !important;
+    transform: translateY(-1px);
+}
+
+.profile-icon {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background: rgba(255,255,255,0.6);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  overflow: hidden;
+  padding: 0;
+}
+.profile-icon img {
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  object-fit: cover;
+  object-position: center;
+  display: block;
+}
+.profile-drawer {
+  position: fixed;
+  top: 0;
+  right: -320px;
+  width: 320px;
+  height: 100%;
+  background: rgba(255,255,255,0.95);
+  box-shadow: -8px 0 24px rgba(0,0,0,0.1);
+  transition: right 0.25s ease;
+  z-index: 1000;
+  padding: 20px;
+  backdrop-filter: blur(8px);
+}
+.profile-drawer.open {
+  right: 0;
+}
+.profile-drawer-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 16px;
+}
+.profile-drawer-avatar {
+  width: 72px;
+  height: 72px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 2px solid #a7f3d0;
+  background: #ecfdf5;
+}
+.profile-drawer-name {
+  font-weight: 700;
+  color: #0f3d2e;
+  margin-top: 8px;
+}
+.profile-drawer-email {
+  font-size: 0.9rem;
+  color: #6b7280;
+}
+.profile-drawer-actions {
+  margin-top: 16px;
+  display: grid;
+  gap: 10px;
+}
+.profile-drawer-btn {
+  width: 100%;
+  border: none;
+  border-radius: 10px;
+  padding: 10px 12px;
+  font-weight: 600;
+  cursor: pointer;
+}
+.profile-drawer-btn.primary {
+  background: #34d399;
+  color: #064e3b;
+}
+.profile-drawer-btn.ghost {
+  background: #e5e7eb;
+  color: #374151;
+}
+.profile-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.2);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.2s ease;
+  z-index: 900;
+}
+.profile-backdrop.show {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+/* 📦 Main layout */
+.container {
+  min-height: calc(100vh - 80px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+}
+
+.main-card {
+    background: linear-gradient(to bottom, rgba(245, 255, 250, 0.8), rgba(240, 253, 245, 0.8));
+    backdrop-filter: blur(var(--blur-strength));
+    -webkit-backdrop-filter: blur(var(--blur-strength));
+    border-radius: 24px;
+    padding: 30px 40px;
+    box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.08);
+    border: 1px solid rgba(16, 185, 129, 0.08);
+    text-align: center;
+    max-width: 600px;
+    width: 100%;
+}
+
+header h1 {
+  font-size: 2rem;
+  margin-bottom: 10px;
+}
+
+header p {
+  font-size: 1.1rem;
+  margin-bottom: 2.5rem;
+  color: #374151;
+}
+
+/* 🚀 Feature buttons */
+.features {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 20px;
+  width: 100%;
+}
+
+/* Make each feature a white rounded row with subtle shadow and left icon */
+.feature-button {
+    background: linear-gradient(135deg, rgba(255, 255, 255, 0.4), rgba(255, 255, 255, 0.2));
+    border: 1px solid var(--border-color);
+    border-radius: 16px;
+    padding: 20px;
+    display: flex;
+    align-items: center;
+    gap: 24px;
+    text-align: left;
+    text-decoration: none;
+    color: var(--secondary-text);
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+}
+
+.feature-button:hover {
+  transform: translateY(-6px);
+  box-shadow: 0 14px 30px rgba(15,23,42,0.08);
+}
+
+.feature-icon {
+  width: 56px;
+  height: 56px;
+  background: rgba(236, 253, 245, 0.7);
+  color: #0d9488;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  font-size: 1.35rem;
+}
+
+.feature-content h3 {
+  margin: 0 0 3px;
+  font-size: 1.15rem;
+  color: #064e3b;
+}
+
+.feature-content p {
+  margin: 0;
+  font-size: 0.95rem;
+  color: #475569;
+}
+
+/* 🌿 Herbal showcase */
+.showcase-section {
+  padding: 60px 20px 90px;
+}
+.showcase-inner {
+  max-width: 1200px;
+  margin: 0 auto;
+}
+.showcase-header {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 16px;
+  margin-bottom: 20px;
+}
+.showcase-header h2 {
+  margin: 0 0 6px;
+  font-size: 1.6rem;
+  color: var(--primary-text);
+}
+.showcase-header p {
+  margin: 0;
+  color: #4b5563;
+}
+.showcase-link {
+  text-decoration: none;
+  padding: 8px 14px;
+  border-radius: 10px;
+  background: rgba(255, 255, 255, 0.8);
+  color: #064e3b;
+  font-weight: 600;
+  border: 1px solid var(--border-color);
+}
+.showcase-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: 18px;
+}
+.showcase-card {
+  background: rgba(255, 255, 255, 0.8);
+  backdrop-filter: blur(16px);
+  border: 1px solid rgba(255, 255, 255, 0.6);
+  border-radius: 18px;
+  box-shadow: 0 18px 40px rgba(16, 185, 129, 0.12);
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+.showcase-card:hover {
+  transform: translateY(-6px);
+  box-shadow: 0 24px 50px rgba(15, 23, 42, 0.12);
+}
+.showcase-image {
+  position: relative;
+  height: 180px;
+  background: #e5e7eb;
+  overflow: hidden;
+}
+.showcase-image img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+  transition: transform 0.5s ease;
+}
+.showcase-card:hover .showcase-image img {
+  transform: scale(1.08);
+}
+.showcase-image-placeholder {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #6b7280;
+  font-size: 0.9rem;
+  background: linear-gradient(135deg, rgba(209, 250, 229, 0.8), rgba(191, 219, 254, 0.7));
+}
+.showcase-body {
+  padding: 18px 18px 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  flex: 1;
+}
+.showcase-title {
+  margin: 0;
+  font-size: 1.1rem;
+  color: #0f172a;
+}
+.showcase-desc {
+  margin: 0;
+  color: #4b5563;
+  font-size: 0.9rem;
+  line-height: 1.5;
+}
+.showcase-btn {
+  margin-top: auto;
+  text-decoration: none;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 10px 14px;
+  border-radius: 12px;
+  background: rgba(16, 185, 129, 0.12);
+  color: #0f766e;
+  font-weight: 700;
+}
+.showcase-loading {
+  grid-column: 1 / -1;
+  text-align: center;
+  color: #6b7280;
+  padding: 30px 10px;
+  background: rgba(255, 255, 255, 0.6);
+  border-radius: 16px;
+  border: 1px dashed rgba(16, 185, 129, 0.2);
+}
+
+/* 📱 Tablet */
+@media (max-width: 1024px) {
+  .main-card {
+    max-width: 90%;
+  }
+}
+
+/* 📱 Mobile */
+@media (max-width: 768px) {
+  .main-card {
+    padding: 25px 20px;
+    border-radius: 20px;
+  }
+
+  header h1 {
+    font-size: 1.5rem;
+  }
+
+  body::before,
+  body::after {
+    font-size: 160px;
+    opacity: 0.25;
+  }
+}
+
+@media (max-width: 640px) {
+  .top-nav {
+    padding: 10px 12px;
+  }
+
+  .logo {
+    font-size: 1.1rem;
+  }
+
+  .auth-links {
+    justify-content: center;
+    width: 100%;
+    gap: 6px;
+  }
+
+  .auth-links a {
+    padding: 5px 10px;
+    font-size: 0.85rem;
+  }
+
+  .profile-icon {
+    width: 32px;
+    height: 32px;
+  }
+}
+
+/* 📱 Small Mobile */
+@media (max-width: 480px) {
+  header h1 {
+    font-size: 1.2rem;
+    margin-bottom: 8px;
+  }
+
+  header p {
+    font-size: 0.95rem;
+  }
+
+  .feature-content h3 {
+    font-size: 1rem;
+  }
+
+  .feature-content p {
+    font-size: 0.85rem;
+  }
+
+  .showcase-header {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+}
+</style>
 </head>
+
 <body>
-    <!-- === ส่วน Navbar === -->
-    <nav class="top-nav">
-        <div class="nav-container">
-            <!-- โลโก้และชื่อเว็บ -->
-            <a href="/" class="logo">🌿 SkinHerbCare</a>
-            <!-- ลิงก์สำหรับเข้าสู่ระบบ/สมัครสมาชิก -->
-            <div class="auth-links">
-                <a href="/" class="login-btn">Home</a>
-                <a href="/login.html" class="login-btn">Log In</a>
-                <a href="/register.html" class="login-btn">Sign Up</a>
-                <div class="profile-icon">
-                     <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="currentColor" viewBox="0 0 16 16">
-                        <path d="M8 8a3 3 0 1 0 0-6 3 3 0 0 0 0 6zm2-3a2 2 0 1 1-4 0 2 2 0 0 1 4 0zm4 8c0 1-1 1-1 1H3s-1 0-1-1 1-4 6-4 6 3 6 4zm-1-.004c-.001-.246-.154-.986-.832-1.664C11.516 10.68 10.289 10 8 10c-2.29 0-3.516.68-4.168 1.332-.678.678-.83 1.418-.832 1.664h10z"/>
-                    </svg>
-                </div>
-            </div>
-        </div>
-    </nav>
 
-    <!-- === ส่วนเนื้อหาหลักที่จัดกึ่งกลาง === -->
-    <div class="container">
-        <!-- การ์ดหลักแบบกระจกฝ้า -->
-        <div class="main-card">
-            <!-- ส่วนหัวข้อ -->
-            <header>
-                <h1>ยินดีต้อนรับสู่เว็ปไซต์แนะนำสมุนไพรรักษาโรคผิวหนัง</h1>
-                <p>โปรดเลือกประเภทการใช้งาน</p>
-            </header>
-
-            <!-- ส่วนเนื้อหาหลัก (ปุ่มฟังก์ชัน) -->
-            <main>
-                <div class="features">
-                    <!-- ฟังก์ชันที่ 1: วิเคราะห์โรค -->
-                    <a href="/analyze-disease.html" class="feature-button">
-                        <div class="feature-icon">
-                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" viewBox="0 0 16 16">
-                                <path d="M11.742 10.344a6.5 6.5 0 1 0-1.397 1.398h-.001c.03.04.062.078.098.115l3.85 3.85a1 1 0 0 0 1.415-1.414l-3.85-3.85a1.007 1.007 0 0 0-.115-.1zM12 6.5a5.5 5.5 0 1 1-11 0 5.5 5.5 0 0 1 11 0z"/>
-                            </svg>
-                        </div>
-                        <div class="feature-content">
-                            <h3>วิเคราะห์รูปโรคผิวหนัง</h3>
-                            <p>อัปโหลดภาพถ่ายผิวเพื่อรับการวิเคราะห์เบื้องต้น</p>
-                        </div>
-                    </a>
-
-                    <!-- ฟังก์ชันที่ 2: ค้นหาสมุนไพร -->
-                    <a href="/analyze-herb.html" class="feature-button">
-                        <div class="feature-icon">
-                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" viewBox="0 0 16 16">
-                                <path d="M11.354 5.646a.5.5 0 0 1 0 .708l-3 3a.5.5 0 0 1-.708 0l-1.5-1.5a.5.5 0 1 1 .708-.708L8 8.293l2.646-2.647a.5.5 0 0 1 .708 0z"/>
-                                <path d="M8 15A7 7 0 1 0 8 1a7 7 0 0 0 0 14zm0 1A8 8 0 1 1 8 0a8 8 0 0 1 0 16z"/>
-                            </svg>
-                        </div>
-                        <div class="feature-content">
-                            <h3>ค้นหาข้อมูลจากรูปสมุนไพร</h3>
-                            <p>อัปโหลดภาพสมุนไพรเพื่อค้นหาข้อมูลและสรรพคุณ</p>
-                        </div>
-                    </a>
-
-                    <!-- ฟังก์ชันที่ 3: วิเคราะห์จากอาการ -->
-                    <a href="/analyze-symptoms.html" class="feature-button">
-                        <div class="feature-icon">
-                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" viewBox="0 0 16 16">
-                                <path d="M2.5 0A2.5 2.5 0 0 0 0 2.5v11A2.5 2.5 0 0 0 2.5 16h11a2.5 2.5 0 0 0 2.5-2.5v-11A2.5 2.5 0 0 0 13.5 0h-11zM2 13.5V2.5A.5.5 0 0 1 2.5 2h11a.5.5 0 0 1 .5.5v11a.5.5 0 0 1-.5.5h-11a.5.5 0 0 1-.5-.5z"/>
-                                <path d="M4.5 5.5a.5.5 0 0 1 .5-.5h5a.5.5 0 0 1 0 1h-5a.5.5 0 0 1-.5-.5zm0 2a.5.5 0 0 1 .5-.5h5a.5.5 0 0 1 0 1h-5a.5.5 0 0 1-.5-.5zm0 2a.5.5 0 0 1 .5-.5h2a.5.5 0 0 1 0 1h-2a.5.5 0 0 1-.5-.5z"/>
-                            </svg>
-                        </div>
-                        <div class="feature-content">
-                            <h3>วิเคราะห์จากอาการที่พิมพ์</h3>
-                            <p>บอกอาการของคุณเพื่อรับคำแนะนำสมุนไพรเบื้องต้น</p>
-                        </div>
-                    </a>
-                </div>
-            </main>
-        </div>
+<nav class="top-nav">
+  <div class="nav-container">
+    <a href="/" class="logo">🌿 SkinHerbCare</a>
+    
+    <!-- Guest Navigation -->
+    <div class="auth-links" id="guest-nav">
+      <a href="/">Home</a>
+      <a href="/login.html">Log In</a>
+      <a href="/register.html">Sign Up</a>
+      <button id="profile-btn-guest" class="profile-icon" aria-label="Profile">
+        <img id="profile-img-guest" src="" alt="Profile" style="display:none;">
+        <span id="profile-fallback-guest">👤</span>
+      </button>
     </div>
+
+    <!-- Admin Navigation -->
+    <div class="auth-links" id="admin-nav" style="display: none;">
+      <a href="/">Home</a>
+      <a href="/admin-dashboard.html" style="background-color: #FFC107; color: #111C44; border-radius: 8px; padding: 6px 12px; font-weight: 600;">
+        ⚙️ จัดการระบบ
+      </a>
+      <button onclick="logout()" style="background: none; border: none; cursor: pointer; text-decoration: none; color: var(--primary-text); font-weight: 600; padding: 6px 12px; border-radius: 8px; font-size: 0.95rem;">
+        Log Out
+      </button>
+      <button id="profile-btn-admin" class="profile-icon" aria-label="Profile">
+        <img id="profile-img-admin" src="" alt="Profile" style="display:none;">
+        <span id="profile-fallback-admin">👤</span>
+      </button>
+    </div>
+  </div>
+</nav>
+
+<div id="profile-backdrop" class="profile-backdrop"></div>
+<aside id="profile-drawer" class="profile-drawer" aria-hidden="true">
+  <div class="profile-drawer-header">
+    <h3 style="font-weight:700;color:#0f3d2e;">โปรไฟล์ผู้ใช้</h3>
+    <button id="profile-close" class="profile-drawer-btn ghost" style="width:auto;padding:6px 10px;">ปิด</button>
+  </div>
+  <div style="display:flex;flex-direction:column;align-items:flex-start;gap:6px;">
+    <img id="profile-drawer-img" class="profile-drawer-avatar" src="" alt="Profile" style="display:none;">
+    <div id="profile-drawer-fallback" class="profile-drawer-avatar" style="display:flex;align-items:center;justify-content:center;font-size:28px;color:#10b981;">👤</div>
+    <div class="profile-drawer-name" id="profile-drawer-name">ผู้ใช้งาน</div>
+    <div class="profile-drawer-email" id="profile-drawer-email">-</div>
+  </div>
+  <div class="profile-drawer-actions">
+    <label class="profile-drawer-btn ghost" for="profile-image-input" style="text-align:center;">เปลี่ยนรูปโปรไฟล์</label>
+    <input id="profile-image-input" type="file" accept="image/*" style="display:none;">
+    <button id="profile-logout" class="profile-drawer-btn primary">ออกจากระบบ</button>
+  </div>
+</aside>
+
+<div class="container">
+  <div class="main-card">
+    <header>
+      <h1>ยินดีต้อนรับสู่เว็บไซต์แนะนำสมุนไพรรักษาโรคผิวหนัง</h1>
+      <p>โปรดเลือกประเภทการใช้งาน</p>
+    </header>
+
+    <div class="features">
+      <a href="/analyze-disease.html" class="feature-button">
+        <div class="feature-icon">🔍</div>
+        <div class="feature-content">
+          <h3>วิเคราะห์รูปโรคผิวหนัง</h3>
+          <p>อัปโหลดภาพถ่ายผิวเพื่อรับการวิเคราะห์เบื้องต้น</p>
+        </div>
+      </a>
+
+      <a href="/analyze-herb.html" class="feature-button">
+        <div class="feature-icon">🌱</div>
+        <div class="feature-content">
+          <h3>ค้นหาข้อมูลจากรูปสมุนไพร</h3>
+          <p>อัปโหลดภาพสมุนไพรเพื่อค้นหาข้อมูลและสรรพคุณ</p>
+        </div>
+      </a>
+
+      <a href="/analyze-symptoms.html" class="feature-button" onclick="checkLogin(event)">
+        <div class="feature-icon">📝</div>
+        <div class="feature-content">
+          <h3>วิเคราะห์จากอาการที่พิมพ์</h3>
+          <p>บอกอาการของคุณเพื่อรับคำแนะนำสมุนไพร</p>
+        </div>
+      </a>
+    </div>
+  </div>
+</div>
+
+<section class="showcase-section">
+  <div class="showcase-inner">
+    <div class="showcase-header">
+      <div>
+        <h2>คลังสมุนไพรแนะนำ</h2>
+        <p>อัปเดตจากฐานข้อมูลล่าสุด</p>
+      </div>
+      <a class="showcase-link" href="/herb_library.html">ดูทั้งหมด</a>
+    </div>
+    <div class="showcase-grid" id="herb-showcase-container">
+      <div class="showcase-loading">กำลังโหลดข้อมูลสมุนไพร...</div>
+    </div>
+  </div>
+</section>
+
+<script>
+    function checkLoginStatus() {
+        const token = localStorage.getItem('token') || localStorage.getItem('userToken');
+        const userRaw = localStorage.getItem('user');
+        const userRole = localStorage.getItem('userRole');
+        const guestNav = document.getElementById('guest-nav');
+        const adminNav = document.getElementById('admin-nav');
+        const adminLink = document.querySelector('#admin-nav a[href="/admin-dashboard.html"]');
+
+        const isLoggedIn = Boolean(token && userRaw);
+        if (guestNav) guestNav.style.display = isLoggedIn ? 'none' : 'flex';
+        if (adminNav) adminNav.style.display = isLoggedIn ? 'flex' : 'none';
+        if (adminLink) adminLink.style.display = userRole === 'admin' ? 'inline-flex' : 'none';
+    }
+
+    function logout() {
+        if (confirm('❓ ต้องการออกจากระบบหรือไม่?')) {
+            localStorage.removeItem('token');
+            localStorage.removeItem('userToken');
+            localStorage.removeItem('user');
+            localStorage.removeItem('userRole');
+            location.reload();
+        }
+    }
+
+    function setupProfilePanel() {
+        const token = localStorage.getItem('token') || localStorage.getItem('userToken');
+        const userRaw = localStorage.getItem('user');
+        const user = userRaw ? JSON.parse(userRaw) : null;
+
+        const btnGuest = document.getElementById('profile-btn-guest');
+        const btnAdmin = document.getElementById('profile-btn-admin');
+        const drawer = document.getElementById('profile-drawer');
+        const backdrop = document.getElementById('profile-backdrop');
+        const closeBtn = document.getElementById('profile-close');
+        const logoutBtn = document.getElementById('profile-logout');
+        const nameEl = document.getElementById('profile-drawer-name');
+        const emailEl = document.getElementById('profile-drawer-email');
+        const imgDrawer = document.getElementById('profile-drawer-img');
+        const fallbackDrawer = document.getElementById('profile-drawer-fallback');
+        const imgGuest = document.getElementById('profile-img-guest');
+        const fallbackGuest = document.getElementById('profile-fallback-guest');
+        const imgAdmin = document.getElementById('profile-img-admin');
+        const fallbackAdmin = document.getElementById('profile-fallback-admin');
+        const imageInput = document.getElementById('profile-image-input');
+
+        const openDrawer = () => {
+            if (!token) {
+                window.location.href = '/login.html';
+                return;
+            }
+            drawer.classList.add('open');
+            backdrop.classList.add('show');
+            drawer.setAttribute('aria-hidden', 'false');
+        };
+        const closeDrawer = () => {
+            drawer.classList.remove('open');
+            backdrop.classList.remove('show');
+            drawer.setAttribute('aria-hidden', 'true');
+        };
+
+        const fullName = user
+            ? [user.firstName, user.lastName].filter(Boolean).join(' ') || user.name || user.username || 'ผู้ใช้งาน'
+            : 'ผู้ใช้งาน';
+        const email = user && user.email ? user.email : '-';
+
+        nameEl.textContent = fullName;
+        emailEl.textContent = email;
+
+        const storageKey = email && email !== '-' ? `profileImage:${email}` : 'profileImage:guest';
+        const legacyImage = localStorage.getItem('profileImage');
+        if (!localStorage.getItem(storageKey) && legacyImage) {
+            localStorage.setItem(storageKey, legacyImage);
+        }
+        const savedImage = localStorage.getItem(storageKey);
+        const applyImage = (src) => {
+            if (src) {
+                const fallback = () => applyImage('');
+                imgDrawer.onerror = fallback;
+                imgGuest.onerror = fallback;
+                imgAdmin.onerror = fallback;
+                imgDrawer.src = src;
+                imgDrawer.style.display = 'block';
+                fallbackDrawer.style.display = 'none';
+                imgGuest.src = src;
+                imgGuest.style.display = 'block';
+                fallbackGuest.style.display = 'none';
+                imgAdmin.src = src;
+                imgAdmin.style.display = 'block';
+                fallbackAdmin.style.display = 'none';
+            } else {
+                imgDrawer.style.display = 'none';
+                fallbackDrawer.style.display = 'flex';
+                imgGuest.style.display = 'none';
+                fallbackGuest.style.display = 'inline';
+                imgAdmin.style.display = 'none';
+                fallbackAdmin.style.display = 'inline';
+            }
+        };
+        applyImage(savedImage);
+
+        if (btnGuest) btnGuest.addEventListener('click', openDrawer);
+        if (btnAdmin) btnAdmin.addEventListener('click', openDrawer);
+        if (closeBtn) closeBtn.addEventListener('click', closeDrawer);
+        if (backdrop) backdrop.addEventListener('click', closeDrawer);
+        if (logoutBtn) logoutBtn.addEventListener('click', logout);
+        if (imageInput) {
+            imageInput.addEventListener('change', () => {
+                const file = imageInput.files && imageInput.files[0];
+                if (!file) return;
+                const reader = new FileReader();
+                reader.onload = (e) => {
+                    const src = e.target.result;
+                    localStorage.setItem(storageKey, src);
+                    applyImage(src);
+                };
+                reader.readAsDataURL(file);
+            });
+        }
+    }
+
+    function checkLogin(event) {
+        const token = localStorage.getItem('token') || localStorage.getItem('userToken');
+        if (!token) {
+            event.preventDefault();
+            window.location.href = '/login.html';
+        }
+    }
+
+    const API_BASE_URL = window.location.hostname.includes('netlify.app')
+        ? 'https://skinherbcareweb1.onrender.com'
+        : window.location.origin;
+
+    function resolveImageSrc(raw) {
+        if (!raw) return '';
+        const val = String(raw).trim();
+        if (!val) return '';
+        if (val.startsWith('http://') || val.startsWith('https://') || val.startsWith('data:')) return val;
+        const normalized = val.replace(/\\/g, '/');
+        if (normalized.startsWith('/uploads/') || normalized.startsWith('/')) return `${API_BASE_URL}${normalized}`;
+        const idx = normalized.lastIndexOf('/uploads/');
+        if (idx >= 0) return `${API_BASE_URL}${normalized.slice(idx)}`;
+        if (/\.(png|jpe?g|gif|webp|avif|svg)$/i.test(normalized)) {
+            return `${API_BASE_URL}/uploads/${normalized.replace(/^\/+/, '')}`;
+        }
+        return `${API_BASE_URL}/${normalized.replace(/^\/+/, '')}`;
+    }
+
+    async function loadShowcaseHerbs() {
+        const container = document.getElementById('herb-showcase-container');
+        if (!container) return;
+
+        try {
+            const response = await fetch(`${API_BASE_URL}/api/herbs`);
+            if (!response.ok) throw new Error('โหลดข้อมูลไม่สำเร็จ');
+            const json = await response.json();
+            const herbs = Array.isArray(json)
+                ? json
+                : (json.herbs || json.data || []);
+
+            if (!Array.isArray(herbs) || herbs.length === 0) {
+                container.innerHTML = '<div class="showcase-loading">ยังไม่มีข้อมูลสมุนไพร</div>';
+                return;
+            }
+
+            const showcaseHerbs = herbs.slice(0, 4);
+            const herbsHtml = showcaseHerbs.map((herb) => {
+                const propertiesText = Array.isArray(herb.properties)
+                    ? herb.properties.join(', ')
+                    : (herb.properties || '');
+                const shortDesc = propertiesText.length > 90
+                    ? `${propertiesText.substring(0, 90)}...`
+                    : (propertiesText || 'ไม่มีข้อมูลสรรพคุณ');
+                const imageSrc = resolveImageSrc(herb.image || '');
+                const herbId = herb._id || herb.id || '';
+
+                return `
+                    <div class="showcase-card">
+                        <div class="showcase-image">
+                            ${imageSrc
+                                ? `<img src="${imageSrc}" alt="${herb.name || 'Herb'}">`
+                                : `<div class="showcase-image-placeholder">No Image</div>`
+                            }
+                        </div>
+                        <div class="showcase-body">
+                            <h3 class="showcase-title">${herb.name || 'ไม่ระบุชื่อ'}</h3>
+                            <p class="showcase-desc">${shortDesc}</p>
+                            <a class="showcase-btn" href="/herb_detail_public.html?id=${herbId}">
+                                อ่านเพิ่มเติม
+                            </a>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+
+            container.innerHTML = herbsHtml;
+        } catch (error) {
+            console.error('Error:', error);
+            container.innerHTML = '<div class="showcase-loading">เกิดข้อผิดพลาดในการโหลดข้อมูล</div>';
+        }
+    }
+
+    document.addEventListener("DOMContentLoaded", () => {
+        checkLoginStatus();
+        setupProfilePanel();
+        loadShowcaseHerbs();
+    });
+</script>
+
 </body>
 </html>
-

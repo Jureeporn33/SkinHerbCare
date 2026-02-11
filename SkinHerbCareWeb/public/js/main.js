@@ -13,11 +13,15 @@
 document.addEventListener('DOMContentLoaded', () => {
     
     console.log('🌿 SkinHerbCare main.js loaded successfully!');
+    const API_BASE_URL = window.location.hostname.includes('netlify.app')
+        ? 'https://skinherbcareweb1.onrender.com'
+        : window.location.origin;
 
     // สร้าง Object หลักสำหรับจัดการฟังก์ชันต่างๆ ของแอป
     const App = {
         // ดึง Token ของผู้ใช้ออกจาก localStorage เมื่อโหลดหน้า
-        token: localStorage.getItem('userToken'),
+        // รองรับทั้ง key เก่า (userToken) และ key ใหม่ (token)
+        token: localStorage.getItem('token') || localStorage.getItem('userToken'),
 
         /**
          * ฟังก์ชันสำหรับอัปเดตหน้าตาของเว็บ (UI) ตามสถานะการล็อกอิน
@@ -48,7 +52,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
             try {
                 // เรียก API ไปยัง /api/auth/profile พร้อมแนบ token ไปเพื่อยืนยันตัวตน
-                const response = await fetch('/api/auth/profile', {
+                const response = await fetch(`${API_BASE_URL}/api/auth/profile`, {
                     headers: {
                         'Authorization': `Bearer ${this.token}`
                     }
@@ -82,7 +86,10 @@ document.addEventListener('DOMContentLoaded', () => {
          * ฟังก์ชันสำหรับจัดการการออกจากระบบ
          */
         handleLogout: function() {
-            localStorage.removeItem('userToken'); // ลบ token ออกจาก localStorage
+            localStorage.removeItem('token');
+            localStorage.removeItem('userToken');
+            localStorage.removeItem('user');
+            localStorage.removeItem('userRole');
             window.location.href = '/login.html'; // ส่งผู้ใช้กลับไปที่หน้าล็อกอิน
         },
 

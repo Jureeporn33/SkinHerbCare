@@ -1,4 +1,4 @@
-import User from '../models/User.js';
+import User from '../models/User.js'; // ตรวจสอบ path ให้ถูกนะครับว่าไฟล์ User.js อยู่ไหน
 import jwt from 'jsonwebtoken';
 
 // ฟังก์ชันสร้าง Token
@@ -11,7 +11,8 @@ const generateToken = (id) => {
 // @desc    สมัครสมาชิก
 // @route   POST /api/auth/register
 export const registerUser = async (req, res) => {
-    const { firstName, lastName, email, password } = req.body;
+    // ✅ 1. รับค่า age และ occupation เพิ่มเข้ามาจาก Frontend
+    const { firstName, lastName, email, password, age, occupation } = req.body;
 
     try {
         const userExists = await User.findOne({ email });
@@ -20,12 +21,14 @@ export const registerUser = async (req, res) => {
             return res.status(400).json({ success: false, message: 'อีเมลนี้ถูกใช้งานแล้ว' });
         }
 
-        // สร้าง User จริงลง MongoDB (Password จะถูก Hash อัตโนมัติจาก Model)
+        // ✅ 2. บันทึกลง Database
         const user = await User.create({
             firstName,
             lastName,
             email,
             password,
+            age,        // บันทึกอายุ
+            occupation, // บันทึกอาชีพ
         });
 
         if (user) {
@@ -34,8 +37,10 @@ export const registerUser = async (req, res) => {
                 _id: user._id,
                 firstName: user.firstName,
                 lastName: user.lastName,
+                age: user.age,               // ส่งกลับไปให้ frontend รู้ด้วย (ถ้าจำเป็น)
+                occupation: user.occupation, // ส่งกลับไปให้ frontend รู้ด้วย (ถ้าจำเป็น)
                 email: user.email,
-                token: generateToken(user._id), // ส่ง Token จริงกลับไป
+                token: generateToken(user._id),
             });
         } else {
             res.status(400).json({ success: false, message: 'ข้อมูลผู้ใช้ไม่ถูกต้อง' });
@@ -51,10 +56,8 @@ export const loginUser = async (req, res) => {
     const { email, password } = req.body;
 
     try {
-        // หา User จากอีเมล และขอ field password มาด้วย (เพราะใน Model set select: false ไว้)
         const user = await User.findOne({ email }).select('+password');
 
-        // ตรวจสอบรหัสผ่านด้วย method ที่เขียนไว้ใน Model
         if (user && (await user.matchPassword(password))) {
             res.json({
                 success: true,
@@ -62,7 +65,8 @@ export const loginUser = async (req, res) => {
                 firstName: user.firstName,
                 lastName: user.lastName,
                 email: user.email,
-                token: generateToken(user._id), // ส่ง Token จริงที่ Auth Middleware จะอ่านรู้เรื่อง
+                role: user.role, // เพิ่ม role ให้ frontend รู้ว่าเป็น user หรือ admin
+                token: generateToken(user._id),
             });
         } else {
             res.status(401).json({ success: false, message: 'อีเมลหรือรหัสผ่านไม่ถูกต้อง' });
@@ -84,6 +88,8 @@ export const getUserProfile = async (req, res) => {
                     id: user._id,
                     firstName: user.firstName,
                     lastName: user.lastName,
+                    age: user.age,               // ✅ ส่งข้อมูลอายุกลับไปตอนเรียกดูโปรไฟล์
+                    occupation: user.occupation, // ✅ ส่งข้อมูลอาชีพกลับไปตอนเรียกดูโปรไฟล์
                     email: user.email,
                     role: user.role
                 }

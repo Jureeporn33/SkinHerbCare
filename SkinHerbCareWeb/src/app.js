@@ -1,116 +1,117 @@
-import express from 'express';
-import dotenv from 'dotenv';
-import cors from 'cors';
-import helmet from 'helmet';
-import rateLimit from 'express-rate-limit';
-import path from 'path';
-import { fileURLToPath } from 'url';
-import morgan from 'morgan'; // 📦 แนะนำให้ลง npm install morgan เพิ่ม
-import connectDB from './config/db.js';
+// src/server.js
+
+import express from "express";
+import cors from "cors";
+import path from "path";
+import { fileURLToPath } from "url";
+import dotenv from "dotenv";
+
+// Import Database
+import connectDB from "./config/db.js";
 
 // Import Routes
-import authRoutes from './routes/auth.js';
-import adminRoutes from './routes/admin.js';
-import geminiRoutes from './routes/gemini.js';
+import authRoutes from "./routes/auth.js";
+import analysisRoutes from "./routes/analysis.js";
+import herbRoutes from "./routes/herbs.js";
+import diseaseRoutes from "./routes/diseases.js";
+import adminRoutes from "./routes/admin.js";
 
-// Config
-dotenv.config();
+async function startServer() {
+  try {
+    // โหลด .env
+    dotenv.config();
 
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
+    // Connect DB
+    await connectDB();
 
-// Connect to Database
-connectDB();
+    const app = express();
 
-// Initialize Express
-const app = express();
+    // ES Module path fix
+    const __filename = fileURLToPath(import.meta.url);
+    const __dirname = path.dirname(__filename);
 
-// 1. Logger (ช่วยดู Log เวลาขึ้น Server จริง)
-app.use(morgan('dev'));
+    // ===============================
+    // 🌐 CORS (แก้ถูกต้อง)
+    // ===============================
+    app.use(
+      cors({
+        origin: "*", // ✅ เปิดทุกเว็บ
+        methods: ["GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"],
+        allowedHeaders: [
+          "Content-Type",
+          "Authorization",
+          "X-Requested-With",
+          "X-API-Key" // ✅ สำคัญมาก
+        ]
+        // ❌ ไม่ใช้ credentials เพราะ origin = "*"
+      })
+    );
 
-// Security Middleware
-app.use(
-  helmet({
-    contentSecurityPolicy: {
-      directives: {
-        ...helmet.contentSecurityPolicy.getDefaultDirectives(),
-        "script-src": ["'self'", "https://cdn.tailwindcss.com", "https://cdn.jsdelivr.net/npm/chart.js", "'unsafe-inline'"],
-        "style-src": ["'self'", "https://fonts.googleapis.com", "'unsafe-inline'"],
-        "font-src": ["'self'", "https://fonts.gstatic.com"],
-        "img-src": ["'self'", "data:", "https://placehold.co"],
-        "connect-src": ["'self'", process.env.FRONTEND_URL || "*"], // กันเหนียวสำหรับ API call
-      },
-    },
-    crossOriginResourcePolicy: { policy: "cross-origin" },
-  })
-);
+    // Allow larger payloads (images may be uploaded via multipart or sent as JSON in rare cases)
+    app.use(express.json({ limit: '50mb' }));
+    app.use(express.urlencoded({ extended: true, limit: '50mb' }));
 
-// 2. CORS แบบปลอดภัย (Production Ready)
-const whitelist = [
-  'http://localhost:5173', 
-  'http://localhost:3000',
-  process.env.FRONTEND_URL // อย่าลืมใส่ใน .env บน Server
-];
+    // ===============================
+    // 📂 Static Files
+    // ===============================
+    app.use(express.static(path.join(__dirname, "../public")));
+    // Serve uploads saved under public/uploads
+    app.use("/uploads", express.static(path.join(__dirname, "../public/uploads")));
 
-app.use(cors({
-  origin: function (origin, callback) {
-    if (!origin || whitelist.includes(origin)) {
-      callback(null, true);
-    } else {
-      console.log('Blocked by CORS:', origin);
-      callback(new Error('Not allowed by CORS'));
-    }
-  },
-  credentials: true
-}));
+    // ===============================
+    // 🔌 API Routes
+    // ===============================
+    app.use("/api/auth", authRoutes);
+    app.use("/api/analysis", analysisRoutes);
+    app.use("/api/herbs", herbRoutes);
+    app.use("/api/diseases", diseaseRoutes);
+    app.use("/api/admin", adminRoutes);
 
-// Rate Limiting
-const limiter = rateLimit({
-  windowMs: 15 * 60 * 1000,
-  max: 100,
-  standardHeaders: true, 
-  legacyHeaders: false,
-});
-app.use('/api/', limiter);
+    // Payload-too-large handler (catch body-parser / multer size errors)
+    app.use((err, req, res, next) => {
+      if (err && (err.type === 'entity.too.large' || err.status === 413)) {
+        console.warn('⚠️ Payload too large:', err.message);
+        return res.status(413).json({ success: false, error: 'ไฟล์หรือข้อมูลขนาดใหญ่เกินไป (limit exceeded). โปรดลองอัปโหลดไฟล์ขนาดเล็กหรือใช้การอัปโหลดแบบไฟล์ (FormData).' });
+      }
+      next(err);
+    });
 
-// Body Parser
-app.use(express.json());
-app.use(express.urlencoded({ extended: true }));
+    // Global error handler (capture upload/cloudinary/multer errors)
+    app.use((err, req, res, next) => {
+      if (!err) return next();
+      console.error('❌ Unhandled Error:', err);
+      const message = err?.message || 'Internal Server Error';
+      res.status(500).json({ success: false, error: message });
+    });
 
-// API Routes
-app.use('/api/auth', authRoutes);
-app.use('/api/admin', adminRoutes);
-app.use('/api/gemini', geminiRoutes);
+    // ===============================
+    // 🏠 Root Route
+    // ===============================
+    app.get("/", (req, res) => {
+      const indexHtmlPath = path.join(__dirname, "../public", "index.html");
+      res.sendFile(indexHtmlPath, (err) => {
+        if (err) {
+          res.send("✅ API Server is running...");
+        }
+      });
+    });
 
-// Static Files
-app.use(express.static(path.join(__dirname, '../public')));
+    // ===============================
+    // 🚀 Start Server
+    // ===============================
+    const PORT = process.env.PORT || 5000;
+    app.listen(PORT, () => {
+      console.log(`🚀 Server running on port ${PORT}`);
+      console.log("📊 Database connected successfully");
+      console.log("🌐 CORS: ALL ORIGINS (*)");
+      console.log("🔐 Headers allowed: X-API-Key");
+      console.log("✅ Ready!");
+    });
 
-// 3. Catch-all Route (แก้ปัญหา Refresh แล้วจอขาว/404 สำหรับ SPA)
-app.get('*', (req, res) => {
-  // ตรวจสอบว่าไม่ใช่ API call ถึงค่อยส่ง index.html
-  if (!req.path.startsWith('/api')) {
-    res.sendFile(path.join(__dirname, '../public', 'index.html'));
-  } else {
-    res.status(404).json({ success: false, message: 'API path not found' });
+  } catch (error) {
+    console.error("❌ Failed to start server:", error.message);
+    process.exit(1);
   }
-});
+}
 
-// Error Handler
-app.use((err, req, res, next) => {
-  console.error('❌ Error:', err.stack);
-  res.status(500).json({
-    success: false,
-    message: process.env.NODE_ENV === 'production' ? 'เกิดข้อผิดพลาดภายในเซิร์ฟเวอร์' : err.message,
-  });
-});
-
-// Start Server
-const PORT = process.env.PORT || 5000;
-app.listen(PORT, () => {
-  console.log(`
-╔═══════════════════════════════════════════════════╗
-║   🌿 Skin Herb Care System                        ║
-║   🚀 Server is running on port ${PORT}               ║
-╚═══════════════════════════════════════════════════╝
-  `);
-});
+startServer();

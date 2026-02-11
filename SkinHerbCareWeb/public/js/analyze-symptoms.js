@@ -1,4 +1,37 @@
-document.addEventListener('DOMContentLoaded', () => {
+document.addEventListener('DOMContentLoaded', async () => {
+    const API_BASE_URL = window.location.hostname.includes('netlify.app')
+        ? 'https://skinherbcareweb1.onrender.com'
+        : window.location.origin;
+    const token = localStorage.getItem('token') || localStorage.getItem('userToken');
+    const userRaw = localStorage.getItem('user');
+    if (!token || !userRaw) {
+        localStorage.removeItem('token');
+        localStorage.removeItem('userToken');
+        localStorage.removeItem('user');
+        localStorage.removeItem('userRole');
+        window.location.href = '/login.html';
+        return;
+    }
+
+    try {
+        const res = await fetch(`${API_BASE_URL}/api/auth/profile`, {
+            headers: {
+                'Authorization': `Bearer ${token}`
+            }
+        });
+        if (!res.ok) {
+            localStorage.removeItem('token');
+            localStorage.removeItem('userToken');
+            localStorage.removeItem('user');
+            localStorage.removeItem('userRole');
+            window.location.href = '/login.html';
+            return;
+        }
+    } catch (e) {
+        window.location.href = '/login.html';
+        return;
+    }
+
     const analyzeBtn = document.getElementById('analyze-symptom-btn');
     const resultsContainer = document.getElementById('results-container');
     const textInput = document.getElementById('symptom-input');
@@ -11,52 +44,123 @@ document.addEventListener('DOMContentLoaded', () => {
             return;
         }
 
-        // Show loading state
+        // Ensure results are visible
+        resultsContainer.classList.remove('hidden');
+
+        // Loading state
         analyzeBtn.disabled = true;
-        analyzeBtn.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i> กำลังวิเคราะห์...';
-        resultsContainer.innerHTML = '<p class="text-gray-500 text-center">กำลังปรึกษา AI... กรุณารอสักครู่ (อาจใช้เวลา 5-10 วินาที)</p>';
+        analyzeBtn.innerHTML = '⏳ กำลังวิเคราะห์...';
+        resultsContainer.innerHTML =
+            '<p class="text-gray-500 text-center">กำลังประมวลผล กรุณารอสักครู่...</p>';
 
         try {
-            const res = await fetch('/api/gemini/suggest-herbs', {
+            const controller = new AbortController();
+            const timeoutId = setTimeout(() => controller.abort(), 20000);
+
+            // ✅ API ที่ถูกต้อง (ใช้ relative URL เพื่อให้ทำงานบน localhost และ Render)
+            const res = await fetch(`${API_BASE_URL}/api/analysis/diagnose`, {
                 method: 'POST',
                 headers: {
-                    'Content-Type': 'application/json'
+                    'Content-Type': 'application/json',
                 },
-                body: JSON.stringify({ symptoms })
+                body: JSON.stringify({ symptoms }),
+                signal: controller.signal
             });
+            clearTimeout(timeoutId);
 
-            const data = await res.json();
+            const json = await res.json();
 
-            if (data.success) {
-                // แสดงผลลัพธ์จาก AI
-                let htmlContent = '<h4 class="text-xl font-bold mb-4 text-green-800">สมุนไพรที่แนะนำ</h4>';
+            if (!json.success) {
+                resultsContainer.innerHTML =
+                    `<p class="text-red-500 text-center">${json.message}</p>`;
+                return;
+            }
 
-                if (data.data.herbs && data.data.herbs.length > 0) {
-                    data.data.herbs.forEach(herb => {
+            const results = Array.isArray(json.data) ? json.data : (json.data ? [json.data] : []);
+            if (!results.length) {
+                resultsContainer.innerHTML = `<p class="text-gray-600 text-center">ยังไม่พบข้อมูลที่ตรงกับอาการนี้</p>`;
+                return;
+            }
+            const extractHerbsFromAdvice = (text) => {
+                if (!text) return [];
+                const match = text.match(/สมุนไพร[:：]\s*([^\n]+)/);
+                if (!match) return [];
+                return match[1]
+                    .split(/,|，|และ|กับ/)
+                    .map(s => s.trim())
+                    .filter(Boolean);
+            };
+            const fetchHerbUsage = async (name) => {
+                try {
+                    const res = await fetch(`${API_BASE_URL}/api/herbs?q=${encodeURIComponent(name)}`);
+                    const json = await res.json();
+                    const herb = (json.herbs && json.herbs[0]) || (json.data && json.data[0]);
+                    return herb ? herb.usage : '';
+                } catch {
+                    return '';
+                }
+            };
+            let htmlContent = `<h4 class="text-xl font-bold mb-4 text-green-800">🧠 ผลการวิเคราะห์</h4>`;
+
+            for (const result of results) {
+                const disease = result.disease || result.prediction || 'ไม่ทราบ';
+                const confidenceRaw = typeof result.confidence === 'number' ? result.confidence : 0;
+                const confidencePct = confidenceRaw > 1 ? Math.round(confidenceRaw) : Math.round(confidenceRaw * 100);
+                const advice = result.advice || result.treatment || result.recommendation || '';
+
+                const rawHerbs = Array.isArray(result.herbs) ? result.herbs : [];
+                const herbNames = rawHerbs.length
+                    ? rawHerbs.map(h => (typeof h === 'string' ? h : (h.name || h.herb))).filter(Boolean)
+                    : extractHerbsFromAdvice(advice);
+
+                const herbDetails = await Promise.all(
+                    herbNames.map(async (name) => ({
+                        name,
+                        usage: await fetchHerbUsage(name)
+                    }))
+                );
+
+                htmlContent += `
+                    <div class="mb-4 p-4 border rounded-lg bg-green-50">
+                        <p><strong>โรคที่คาดว่าเป็น:</strong> ${disease}</p>
+                        <p><strong>ความมั่นใจ:</strong> ${confidencePct}%</p>
+                        ${advice ? `<p><strong>คำแนะนำ:</strong> ${advice}</p>` : ''}
+                    </div>
+
+                    <h5 class="text-lg font-bold mb-2 text-green-700">🌿 สมุนไพรที่แนะนำ</h5>
+                `;
+
+                if (herbDetails.length > 0) {
+                    herbDetails.forEach((herb) => {
                         htmlContent += `
-                            <div class="mb-4 p-4 border border-green-100 rounded-lg bg-green-50">
-                                <h5 class="text-lg font-bold text-green-700 mb-2">${herb.name}</h5>
-                                <p class="mb-1"><strong class="text-gray-700">สรรพคุณ:</strong> <span class="text-gray-600">${herb.properties}</span></p>
-                                <p><strong class="text-gray-700">วิธีใช้:</strong> <span class="text-gray-600">${herb.usage}</span></p>
+                            <div class="mb-2 p-3 border border-green-100 rounded bg-white">
+                                • <strong>${herb.name}</strong>
+                                ${herb.usage ? `<div class="text-sm text-gray-600 mt-1"><strong>วิธีใช้:</strong> ${herb.usage}</div>` : ''}
                             </div>
                         `;
                     });
                 } else {
-                    htmlContent += `<p>${JSON.stringify(data.data)}</p>`;
+                    htmlContent += `<p class="text-gray-600">ไม่มีข้อมูลสมุนไพร</p>`;
                 }
-
-                resultsContainer.innerHTML = htmlContent;
-            } else {
-                resultsContainer.innerHTML = `<p class="text-red-500 text-center">เกิดข้อผิดพลาด: ${data.message}</p>`;
-                alert('เกิดข้อผิดพลาด: ' + data.message);
             }
+
+            resultsContainer.innerHTML = htmlContent;
 
         } catch (error) {
             console.error('Error:', error);
-            resultsContainer.innerHTML = `<p class="text-red-500 text-center">ไม่สามารถเชื่อมต่อกับเซิร์ฟเวอร์ได้</p>`;
-            alert('ไม่สามารถเชื่อมต่อกับเซิร์ฟเวอร์ได้');
+            if (error.name === 'AbortError') {
+                resultsContainer.innerHTML =
+                    `<p class="text-red-500 text-center">
+                        ⏱️ ระบบใช้เวลานานเกินไป กรุณาลองใหม่อีกครั้ง
+                    </p>`;
+                return;
+            }
+            resultsContainer.innerHTML =
+                `<p class="text-red-500 text-center">
+                    ❌ ไม่สามารถเชื่อมต่อกับเซิร์ฟเวอร์ได้<br>
+                    (ตรวจสอบว่า npm run dev หรือ npm start ทำงานอยู่)
+                </p>`;
         } finally {
-            // Reset button
             analyzeBtn.disabled = false;
             analyzeBtn.innerHTML = 'วิเคราะห์';
         }
