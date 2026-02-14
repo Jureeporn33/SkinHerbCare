@@ -121,7 +121,9 @@
     </div>
 
     <script>
-        const API_BASE_URL = window.location.origin;
+        const API_BASE_URL = window.location.hostname.includes('netlify.app')
+            ? 'https://skinherbcareweb1.onrender.com'
+            : window.location.origin;
         const step1 = document.getElementById('step-1-content');
         const step2 = document.getElementById('step-2-content');
         const circle1 = document.getElementById('circle-1');
@@ -136,7 +138,7 @@
             if (!listEl) return;
             const token = localStorage.getItem('token') || localStorage.getItem('userToken');
             try {
-                const res = await fetch('/api/diseases/admin', {
+                const res = await fetch(`${API_BASE_URL}/api/diseases`, {
                     headers: token ? { 'Authorization': `Bearer ${token}` } : {}
                 });
                 if (!res.ok) throw new Error('โหลดโรคไม่สำเร็จ');
@@ -153,6 +155,11 @@
                     label.innerHTML = `<input type="checkbox" value="${d.name}" class="w-5 h-5 custom-checkbox rounded border-gray-400 text-[#111C44]"><span class="text-gray-700">${d.name}</span>`;
                     listEl.appendChild(label);
                 });
+                if (Array.isArray(pendingDiseaseSelections)) {
+                    document.querySelectorAll('#disease-list input[type="checkbox"]').forEach((cb) => {
+                        cb.checked = pendingDiseaseSelections.includes(cb.value);
+                    });
+                }
             } catch (e) {
                 listEl.innerHTML = '<div class="text-sm text-gray-500">โหลดรายการโรคไม่สำเร็จ</div>';
             }
@@ -162,6 +169,7 @@
         let uploadedImageFile = null;
         let existingImageUrl = '';
         let editingHerbId = null;
+        let pendingDiseaseSelections = null;
 
         const LAST_IMAGE_KEY = 'lastUploadedHerbImage';
 
@@ -202,6 +210,12 @@
             }
 
             const editingId = sessionStorage.getItem('editingHerbId');
+            const rawPreview = sessionStorage.getItem('editingHerbData');
+            if (rawPreview) {
+                try {
+                    applyHerbToForm(JSON.parse(rawPreview), true);
+                } catch (_) {}
+            }
             if (editingId) {
                 sessionStorage.removeItem('editingHerbId');
                 loadHerbForEdit(editingId);
@@ -357,10 +371,10 @@
         }
 
         async function loadHerbForEdit(id) {
-            const token = localStorage.getItem('token');
+            const token = localStorage.getItem('token') || localStorage.getItem('userToken');
             if (!token) return;
             try {
-                const res = await fetch(`/api/herbs/${id}`, {
+                const res = await fetch(`${API_BASE_URL}/api/herbs/${id}`, {
                     headers: { 'Authorization': `Bearer ${token}` }
                 });
                 if (!res.ok) throw new Error('Load failed');
@@ -368,30 +382,51 @@
                 const herb = data.herb || data.data || data;
                 if (!herb) return;
 
-                editingHerbId = id;
-                document.getElementById('input-name').value = herb.name || '';
-                document.getElementById('input-eng').value = herb.scientificName || herb.engName || '';
-                document.getElementById('input-desc').value = herb.description || '';
-                document.getElementById('input-prop').value = Array.isArray(herb.properties) ? herb.properties.join(', ') : (herb.properties || '');
-                document.getElementById('input-usage').value = herb.usage || '';
-                if (document.getElementById('input-published')) {
-                    document.getElementById('input-published').checked = herb.published === true;
-                }
-
-                // set diseases checkboxes
-                const diseases = Array.isArray(herb.diseases) ? herb.diseases : [];
-                document.querySelectorAll('#disease-list input[type="checkbox"]').forEach((cb) => {
-                    cb.checked = diseases.includes(cb.value);
-                });
-
-                existingImageUrl = herb.image || '';
-                renderImagePreview(existingImageUrl);
+                applyHerbToForm(herb, false);
 
                 step2.classList.add('hidden');
                 step1.classList.remove('hidden');
                 window.scrollTo({ top: 0, behavior: 'smooth' });
             } catch (e) {
                 console.error(e);
+            }
+        }
+
+        function applyHerbToForm(herb, keepExistingId = false) {
+            if (!herb || typeof herb !== 'object') return;
+            const resolvedId = herb._id || herb.id || editingHerbId;
+            if (!keepExistingId || resolvedId) {
+                editingHerbId = resolvedId || editingHerbId;
+            }
+
+            const setIfPresent = (id, value) => {
+                const el = document.getElementById(id);
+                if (!el) return;
+                if (value !== undefined && value !== null && String(value).trim() !== '') {
+                    el.value = value;
+                }
+            };
+
+            setIfPresent('input-name', herb.name);
+            setIfPresent('input-eng', herb.scientificName || herb.engName);
+            setIfPresent('input-desc', herb.description);
+            setIfPresent('input-prop', Array.isArray(herb.properties) ? herb.properties.join(', ') : herb.properties);
+            setIfPresent('input-usage', herb.usage);
+            if (document.getElementById('input-published')) {
+                document.getElementById('input-published').checked = herb.published === true;
+            }
+
+            if (Array.isArray(herb.diseases) && herb.diseases.length > 0) {
+                const diseases = herb.diseases;
+                pendingDiseaseSelections = diseases;
+                document.querySelectorAll('#disease-list input[type="checkbox"]').forEach((cb) => {
+                    cb.checked = diseases.includes(cb.value);
+                });
+            }
+
+            if (herb.image && String(herb.image).trim() !== '') {
+                existingImageUrl = herb.image;
+                renderImagePreview(existingImageUrl);
             }
         }
 

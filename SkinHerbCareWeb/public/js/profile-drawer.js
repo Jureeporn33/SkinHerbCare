@@ -1,10 +1,15 @@
 document.addEventListener('DOMContentLoaded', () => {
+    window.__PROFILE_DRAWER_ACTIVE__ = true;
     const path = window.location.pathname || '';
     if (path.endsWith('/login.html') || path.endsWith('/register.html')) {
         return;
     }
-    const token = localStorage.getItem('token') || localStorage.getItem('userToken');
-    const userRaw = localStorage.getItem('user');
+    const token =
+        localStorage.getItem('token') ||
+        localStorage.getItem('userToken') ||
+        sessionStorage.getItem('token') ||
+        sessionStorage.getItem('userToken');
+    const userRaw = localStorage.getItem('user') || sessionStorage.getItem('user');
     const user = userRaw ? JSON.parse(userRaw) : null;
     const ASSET_BASE_URL = window.location.hostname.includes('netlify.app')
         ? 'https://skinherbcareweb1.onrender.com'
@@ -180,6 +185,7 @@ document.addEventListener('DOMContentLoaded', () => {
     sidebarNames.forEach((el) => { el.textContent = fullName; });
 
     const sidebarImgs = Array.from(document.querySelectorAll('.admin-sidebar-img'));
+    const sidebarFallback = document.getElementById('profile-sidebar-fallback');
 
     const profileIconEls = Array.from(document.querySelectorAll('.profile-icon'));
     const ensureProfileIcon = (el) => {
@@ -209,17 +215,8 @@ document.addEventListener('DOMContentLoaded', () => {
         const value = String(src).trim();
         if (!value) return '';
         if (value.startsWith('data:') || value.startsWith('http://') || value.startsWith('https://')) return value;
-
-        const normalized = value.replace(/\\/g, '/');
-        if (normalized.startsWith('/uploads/') || normalized.startsWith('/')) return `${ASSET_BASE_URL}${normalized}`;
-
-        const uploadsIndex = normalized.lastIndexOf('/uploads/');
-        if (uploadsIndex >= 0) return `${ASSET_BASE_URL}${normalized.slice(uploadsIndex)}`;
-
-        if (/\.(png|jpe?g|gif|webp|avif|svg)$/i.test(normalized)) {
-            return `${ASSET_BASE_URL}/uploads/${normalized.replace(/^\/+/, '')}`;
-        }
-        return `${ASSET_BASE_URL}/${normalized.replace(/^\/+/, '')}`;
+        if (value.startsWith('/uploads/') || value.startsWith('/')) return `${ASSET_BASE_URL}${value}`;
+        return `${ASSET_BASE_URL}/${value}`;
     };
 
     const applyImage = (src) => {
@@ -257,7 +254,9 @@ document.addEventListener('DOMContentLoaded', () => {
             });
             sidebarImgs.forEach((img) => {
                 img.src = normalized;
+                img.style.display = 'block';
             });
+            if (sidebarFallback) sidebarFallback.style.display = 'none';
         } else {
             imgDrawer.style.display = 'none';
             fallbackDrawer.style.display = 'flex';
@@ -274,48 +273,16 @@ document.addEventListener('DOMContentLoaded', () => {
             });
             sidebarImgs.forEach((img) => {
                 img.src = '';
+                img.style.display = 'none';
             });
+            if (sidebarFallback) sidebarFallback.style.display = 'flex';
         }
     };
     const legacyImage = localStorage.getItem('profileImage');
     if (!localStorage.getItem(storageKey) && legacyImage) {
         localStorage.setItem(storageKey, legacyImage);
     }
-
-    const userImage = user && (user.profileImage || user.profile_image || user.avatar || user.image || user.photo)
-        ? (user.profileImage || user.profile_image || user.avatar || user.image || user.photo)
-        : '';
-    const storedImage = localStorage.getItem(storageKey) || '';
-    const initialImage = storedImage || userImage;
-    if (!storedImage && userImage) {
-        localStorage.setItem(storageKey, userImage);
-        localStorage.setItem('profileImage', userImage);
-    }
-    applyImage(initialImage);
-
-    const syncProfileFromApi = async () => {
-        if (!token) return;
-        try {
-            const res = await fetch(`${ASSET_BASE_URL}/api/auth/profile`, {
-                headers: { 'Authorization': `Bearer ${token}` }
-            });
-            if (!res.ok) return;
-            const json = await res.json().catch(() => null);
-            const apiUser = json && (json.user || json.data);
-            if (!apiUser) return;
-
-            localStorage.setItem('user', JSON.stringify(apiUser));
-            const apiImage = apiUser.profileImage || apiUser.profile_image || apiUser.avatar || apiUser.image || apiUser.photo || '';
-            if (!apiImage) return;
-
-            localStorage.setItem(storageKey, apiImage);
-            localStorage.setItem('profileImage', apiImage);
-            applyImage(apiImage);
-        } catch (error) {
-            console.warn('profile-drawer: profile sync failed', error);
-        }
-    };
-    syncProfileFromApi();
+    applyImage(localStorage.getItem(storageKey));
 
     const openDrawer = () => {
         if (!token) {
@@ -341,8 +308,13 @@ document.addEventListener('DOMContentLoaded', () => {
     if (!hasAdminSidebar) {
         drawer.querySelector('#profile-logout').addEventListener('click', () => {
             localStorage.removeItem('token');
+            localStorage.removeItem('userToken');
             localStorage.removeItem('user');
             localStorage.removeItem('userRole');
+            sessionStorage.removeItem('token');
+            sessionStorage.removeItem('userToken');
+            sessionStorage.removeItem('user');
+            sessionStorage.removeItem('userRole');
             // keep per-user profile images
             window.location.href = '/login.html';
         });

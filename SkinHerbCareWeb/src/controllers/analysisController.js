@@ -1,5 +1,6 @@
 // Node v20+ มี fetch ให้แล้ว ไม่ต้อง import
 import Disease from '../models/Disease.js';
+import ProcessingDisease from '../models/ProcessingDisease.js';
 import Herb from '../models/Herb.js';
 import xlsx from 'xlsx';
 import path from 'path';
@@ -53,6 +54,10 @@ const buildDiseaseText = (d) => {
         d.engName,
         d.description,
         Array.isArray(d.symptoms) ? d.symptoms.join(' ') : d.symptoms,
+        d.subSymptoms,
+        d.locations,
+        d.cause,
+        d.treatment,
         Array.isArray(d.medicines) ? d.medicines.join(' ') : d.medicines,
         d.usage
     ].filter(Boolean);
@@ -122,37 +127,9 @@ const fallbackAnalyze = async (symptomsText) => {
         const tokens = tokenize(symptomsText);
         if (tokens.length === 0) return [];
 
-        const excelRows = loadExcelData();
-        if (Array.isArray(excelRows) && excelRows.length > 0) {
-            const scored = excelRows.map((row) => {
-                const diseaseName = row['รายชื่อโรค'] || row['ชื่อโรค'] || row['disease'] || '';
-                const main = row['อาการหลัก'] || '';
-                const sub = row['อาการรอง'] || '';
-                const loc = row['ตำแหน่งที่พบบ่อย'] || '';
-                const cause = row['สาเหตุ'] || '';
-                const treat = row['วิธีรักษาเบื้อต้น'] || '';
-                const text = [diseaseName, main, sub, loc, cause, treat].filter(Boolean).join(' ').toLowerCase();
-                let hits = 0;
-                tokens.forEach((t) => {
-                    if (text.includes(t)) hits += 1;
-                });
-                const score = hits / tokens.length;
-                return { row, score };
-            }).filter(item => item.score > 0);
+        // Use processing dataset from MongoDB (datadiseases) only.
 
-            scored.sort((a, b) => b.score - a.score);
-            return scored.slice(0, 3).map(({ row, score }) => ({
-                disease: row['รายชื่อโรค'] || row['ชื่อโรค'] || row['disease'] || '',
-                confidence: Math.round(score * 100),
-                main_symptoms: row['อาการหลัก'] || '',
-                secondary_symptoms: row['อาการรอง'] || '',
-                recommendation: row['วิธีรักษาเบื้อต้น'] || '',
-                location: row['ตำแหน่งที่พบบ่อย'] || '',
-                cause: row['สาเหตุ'] || ''
-            }));
-        }
-
-        const diseases = await Disease.find({}).lean();
+        const diseases = await ProcessingDisease.find({}).lean();
         if (!Array.isArray(diseases) || diseases.length === 0) return [];
 
         const scored = diseases.map((d) => {
@@ -170,10 +147,10 @@ const fallbackAnalyze = async (symptomsText) => {
             disease: d.name,
             confidence: Math.round(score * 100),
             main_symptoms: Array.isArray(d.symptoms) ? d.symptoms.join(', ') : (d.symptoms || ''),
-            secondary_symptoms: '',
-            recommendation: d.usage || d.description || '',
-            location: '',
-            cause: ''
+            secondary_symptoms: d.subSymptoms || '',
+            recommendation: d.treatment || d.usage || d.description || '',
+            location: d.locations || '',
+            cause: d.cause || ''
         }));
     } catch (e) {
         return [];
@@ -183,7 +160,8 @@ const fallbackAnalyze = async (symptomsText) => {
 export const diagnoseSymptoms = async (req, res) => {
     try {
         const { symptoms } = req.body;
-        const usePython = process.env.USE_PYTHON_ANALYSIS !== 'false';
+        // Force processing from data2 dataset in MongoDB (datadiseases) only.
+        const usePython = false;
 
         // 1. Validate input
         if (!symptoms || typeof symptoms !== "string" || !symptoms.trim()) {
@@ -350,3 +328,4 @@ export const diagnoseSymptoms = async (req, res) => {
         });
     }
 };
+

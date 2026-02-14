@@ -27,7 +27,29 @@ const __dirname = path.dirname(__filename);
 // -------------------------------------------------------------
 // Middleware
 // -------------------------------------------------------------
-app.use(cors());
+const allowedOrigins = [
+    'https://skinherbcareweb2.netlify.app',
+    'https://skinherbcareweb1.onrender.com'
+];
+
+const corsOptions = {
+    origin: (origin, callback) => {
+        // Allow non-browser requests (no Origin header)
+        if (!origin) return callback(null, true);
+        const isNetlifyPreview = /^https:\/\/.+--skinherbcareweb2\.netlify\.app$/.test(origin);
+        if (allowedOrigins.includes(origin) || isNetlifyPreview) {
+            return callback(null, true);
+        }
+        console.log('Blocked by CORS:', origin);
+        return callback(new Error('Not allowed by CORS'));
+    },
+    credentials: true,
+    methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
+    allowedHeaders: ['Content-Type', 'Authorization']
+};
+
+app.use(cors(corsOptions));
+app.options('*', cors(corsOptions));
 app.use(express.json());
 
 // -------------------------------------------------------------
@@ -157,14 +179,6 @@ app.post('/api/skin/predict', upload.single('file'), async (req, res) => {
 // -------------------------------------------------------------
 // Status check
 // -------------------------------------------------------------
-app.get('/healthz', (req, res) => {
-    res.status(200).json({
-        ok: true,
-        service: 'skinherbcare-node',
-        ts: new Date().toISOString()
-    });
-});
-
 app.get('/status', async (req, res) => {
     const pythonUrl = process.env.PYTHON_API_URL;
 
