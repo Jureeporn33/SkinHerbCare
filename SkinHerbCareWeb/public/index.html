@@ -461,9 +461,10 @@ async function loadShowcaseDiseases() {
       const symptomsText = Array.isArray(disease.symptoms) ? disease.symptoms.join(', ') : (disease.symptoms || '');
       const shortDesc = symptomsText.length > 90 ? `${symptomsText.substring(0, 90)}...` : (symptomsText || disease.description || 'ไม่มีข้อมูลอาการ');
       const diseaseId = disease._id || disease.id || '';
+      const imageSrc = resolveImageSrc(disease.image || disease.imageUrl || disease.photo || '');
       return `
       <div class="card">
-        <div class="card-media">Disease</div>
+        <div class="card-media">${imageSrc ? `<img src="${imageSrc}" alt="${disease.name || 'Disease'}">` : 'Disease'}</div>
         <div class="card-body">
           <h3 class="card-title">${disease.name || 'ไม่ระบุชื่อโรค'}</h3>
           <p class="card-desc">${shortDesc}</p>
