@@ -28,6 +28,7 @@ const __dirname = path.dirname(__filename);
 // Middleware
 // -------------------------------------------------------------
 const allowedOrigins = [
+    'https://skinherbcareweb1.netlify.app',
     'https://skinherbcareweb2.netlify.app',
     'https://skinherbcareweb1.onrender.com'
 ];
@@ -36,7 +37,7 @@ const corsOptions = {
     origin: (origin, callback) => {
         // Allow non-browser requests (no Origin header)
         if (!origin) return callback(null, true);
-        const isNetlifyPreview = /^https:\/\/.+--skinherbcareweb2\.netlify\.app$/.test(origin);
+        const isNetlifyPreview = /^https:\/\/.+--skinherbcareweb(1|2)\.netlify\.app$/.test(origin);
         if (allowedOrigins.includes(origin) || isNetlifyPreview) {
             return callback(null, true);
         }
