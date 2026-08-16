@@ -25,6 +25,8 @@ const PORT = process.env.PORT || 5000;
 // Ensure CORS headers are present early so errors still include them.
 app.use((req, res, next) => {
     const origin = req.headers.origin;
+    // Lightweight request-start logging to aid debugging on Render
+    console.log(`[CORS-EARLY] ${req.method} ${req.url} origin=${origin || '(none)'} ip=${req.ip || req.connection?.remoteAddress}`);
     if (origin) {
         res.setHeader('Access-Control-Allow-Origin', origin);
     } else {
