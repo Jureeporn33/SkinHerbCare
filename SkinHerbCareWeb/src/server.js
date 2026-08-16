@@ -285,11 +285,27 @@ app.post('/api/bridge/analyze', upload.single('image'), async (req, res) => {
 // ✅ Error Handling Middleware
 // -------------------------------------------------------------
 app.use((err, req, res, next) => {
-    console.error('💥 Unhandled Error:', err.stack);
+    // Ensure CORS headers are present on error responses so browser receives them
+    const origin = req.headers.origin;
+    try {
+        if (origin) {
+            res.setHeader('Access-Control-Allow-Origin', origin);
+        } else {
+            res.setHeader('Access-Control-Allow-Origin', '*');
+        }
+        res.setHeader('Access-Control-Allow-Credentials', 'true');
+        res.setHeader('Access-Control-Allow-Methods', 'GET,POST,PUT,DELETE,PATCH,OPTIONS');
+        res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization, X-Requested-With, X-API-Key');
+    } catch (setErr) {
+        console.warn('Could not set CORS headers on error response:', setErr && setErr.message);
+    }
+
+    console.error('💥 Unhandled Error:', err && err.stack ? err.stack : err);
     res.status(500).json({
         success: false,
         message: 'เกิดข้อผิดพลาดภายในเซิร์ฟเวอร์',
-        error: process.env.NODE_ENV === 'development' ? err.message : undefined
+        // include error message in development to aid debugging
+        error: process.env.NODE_ENV === 'development' ? (err && err.message) : undefined
     });
 });
 
