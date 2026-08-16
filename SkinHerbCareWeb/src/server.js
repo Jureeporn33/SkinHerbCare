@@ -48,21 +48,9 @@ const allowedOrigins = [
     'https://skinherbcareweb1.onrender.com'
 ];
 
-const corsOptions = {
-    origin: (origin, callback) => {
-        // Allow non-browser requests (no Origin header)
-        if (!origin) return callback(null, true);
-        const isNetlifyPreview = /^https:\/\/.+--skinherbcareweb(1|2)\.netlify\.app$/.test(origin);
-        if (allowedOrigins.includes(origin) || isNetlifyPreview) {
-            return callback(null, true);
-        }
-        console.log('Blocked by CORS:', origin);
-        return callback(new Error('Not allowed by CORS'));
-    },
-    credentials: true,
-    methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
-    allowedHeaders: ['Content-Type', 'Authorization']
-};
+// Removed strict callback CORS options (caused "Not allowed by CORS" errors in production). Rely on permissive reflected CORS below.
+const corsOptions = null; // preserved variable name for compatibility if referenced elsewhere (not used)
+
 
 // Use permissive CORS in production to avoid 500s from origin rejections
 app.use(
