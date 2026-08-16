@@ -64,8 +64,16 @@ const corsOptions = {
     allowedHeaders: ['Content-Type', 'Authorization']
 };
 
-app.use(cors(corsOptions));
-app.options('*', cors(corsOptions));
+// Use permissive CORS in production to avoid 500s from origin rejections
+app.use(
+    cors({
+        origin: true, // reflect request origin and allow it
+        credentials: true,
+        methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
+        allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With', 'X-API-Key']
+    })
+);
+app.options('*', cors());
 app.use(express.json());
 
 // -------------------------------------------------------------
