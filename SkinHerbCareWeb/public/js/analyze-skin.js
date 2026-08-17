@@ -11,9 +11,9 @@
         || (window.location.hostname.includes('netlify.app')
             ? 'https://skinherbcareweb1.onrender.com'
             : window.location.origin);
-    const directUrl = window.SKIN_API_URL || '';
-    const apiKey = window.SKIN_API_KEY || '';
-    const API_URL = directUrl || `${baseUrl}/api/skin/predict`;
+    // Send images through our server so the model API key is never exposed to
+    // browser users. The server reads API_KEY_SKIN_DISEASE from Render.
+    const API_URL = `${baseUrl}/api/skin/predict`;
     const RENDER_API_BASE = 'https://skinherbcareweb1.onrender.com';
 
     const setLoading = (isLoading) => {
@@ -240,12 +240,8 @@
                 size: currentImageBlob.size
             });
 
-            const headers = {};
-            if (apiKey) headers['X-API-Key'] = apiKey;
-
             const res = await fetch(API_URL, {
                 method: 'POST',
-                headers,
                 body: formData
             });
 

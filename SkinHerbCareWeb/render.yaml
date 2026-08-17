@@ -20,6 +20,8 @@ services:
         sync: false
       - key: MONGODB_URI
         sync: false
+      - key: API_KEY_SKIN_DISEASE
+        sync: false
 
   - type: web
     name: skinherbcare-python

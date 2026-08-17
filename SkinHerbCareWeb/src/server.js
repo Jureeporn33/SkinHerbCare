@@ -146,8 +146,11 @@ app.post('/api/skin/predict', upload.single('file'), async (req, res) => {
             return res.status(400).json({ success: false, message: 'No image file provided.' });
         }
 
-        const skinUrl = process.env.SKIN_API_URL || 'https://b37b065bacf4.ngrok-free.app/predict';
-        const skinKey = (process.env.SKIN_API_KEY || 'skin-func-66xe25').trim();
+        // Keep the model URL and its key server-side. API_KEY_SKIN_DISEASE is
+        // configured in Render; SKIN_API_KEY remains as a backwards-compatible
+        // fallback for existing deployments.
+        const skinUrl = process.env.SKIN_API_URL || 'https://paew-skin-maskrcnn-model.hf.space/predict';
+        const skinKey = (process.env.API_KEY_SKIN_DISEASE || process.env.SKIN_API_KEY || '').trim();
 
         console.log('[Skin Proxy] Incoming file:', {
             name: req.file.originalname,

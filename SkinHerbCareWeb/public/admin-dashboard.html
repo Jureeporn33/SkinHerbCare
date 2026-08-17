@@ -72,7 +72,7 @@
 
     <script>
         window.addEventListener('DOMContentLoaded', () => {
-            const token = localStorage.getItem('token');
+            const token = localStorage.getItem('token') || localStorage.getItem('userToken');
             const userStr = localStorage.getItem('user');
             
             if (!token) {
@@ -82,7 +82,8 @@
 
             const user = JSON.parse(userStr || '{}');
             
-            if (user.role !== 'admin') {
+            const role = String(user.role || user.userRole || localStorage.getItem('userRole') || '').toLowerCase();
+            if (role !== 'admin') {
                 window.location.href = '/index.html'; // หรือ user-dashboard
                 return;
             }
@@ -249,9 +250,7 @@
     <div id="profile-backdrop" class="profile-backdrop"></div>
     <aside id="profile-drawer" class="profile-drawer" aria-hidden="true">
         <div class="flex items-center justify-between mb-4">
-            <h3 class="font-bold text-[#0f3d2e]">โปรไฟล์ผู้ใช้</h3>
-            <button id="profile-close" class="profile-drawer-btn ghost" style="width:auto;padding:6px 10px;">ปิด</button>
-        </div>
+            <h3 class="font-bold text-[#0f3d2e]">โปรไฟล์ผู้ใช้</h3>        </div>
         <div class="flex flex-col items-start gap-2">
             <img id="profile-drawer-img" class="profile-drawer-avatar" src="" alt="Profile" style="display:none;">
             <div id="profile-drawer-fallback" class="profile-drawer-avatar flex items-center justify-center text-2xl text-green-500">👤</div>
@@ -266,7 +265,7 @@
     </aside>
 
     <script src="/js/main.js"></script> 
-    <script src="/js/profile-drawer.js"></script>
+    <script src="/js/profile-drawer.js?v=20260211r15"></script>
     <script>
         function logout() {
             if (confirm('❓ ต้องการออกจากระบบหรือไม่?')) {
@@ -380,6 +379,7 @@
         });
 
         (function setupProfilePanel() {
+            if (window.__PROFILE_DRAWER_ACTIVE__) return;
             const token = localStorage.getItem('token');
             const userRaw = localStorage.getItem('user');
             const user = userRaw ? JSON.parse(userRaw) : null;
@@ -461,3 +461,5 @@
     </script>
 </body>
 </html>
+
+
